@@ -110,9 +110,9 @@ export default function Tasks() {
     : tasks
 
   return (
-    <div>
-      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
-        <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
+        <div className="min-w-0">
           <h1 className="page-title">Tasks</h1>
           <p className="text-sm text-ink-muted mt-0.5">{counts.active} active · {counts.done} done</p>
         </div>
@@ -134,7 +134,7 @@ export default function Tasks() {
       ) : visible.length === 0 ? (
         <EmptyState text={filter === 'active' ? 'No active tasks.' : filter === 'done' ? 'No completed tasks yet.' : 'No tasks yet.'} action={<button onClick={openAdd} className="btn-primary mt-3">Add Task</button>} />
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-3 min-w-0">
           {visible.map(task => (
             <ItemCard
               key={task.id} type="task" item={task}

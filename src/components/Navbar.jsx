@@ -27,9 +27,9 @@ export default function Navbar() {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <header className="bg-white border-b border-surface-border sticky top-0 z-30">
-      <div className="max-w-5xl mx-auto px-3 sm:px-4">
-        <div className="flex items-center justify-between h-14">
+    <header className="bg-white border-b border-surface-border sticky top-0 z-30 w-full max-w-full overflow-x-hidden">
+      <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 min-w-0">
+        <div className="flex items-center justify-between h-14 min-w-0 gap-2">
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
@@ -39,13 +39,13 @@ export default function Navbar() {
           </NavLink>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center justify-center gap-1 min-w-0 flex-1 px-2">
             {navItems.map(({ to, label, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
+                  `min-w-0 flex items-center gap-1.5 px-2 lg:px-3 py-1.5 rounded-lg text-sm font-medium transition-colors duration-150 ${
                     isActive
                       ? 'bg-brand-50 text-brand-700'
                       : 'text-ink-muted hover:text-ink hover:bg-surface'
@@ -53,7 +53,7 @@ export default function Navbar() {
                 }
               >
                 <Icon className="w-4 h-4" />
-                {label}
+                <span className="truncate">{label}</span>
               </NavLink>
             ))}
           </nav>
@@ -62,7 +62,7 @@ export default function Navbar() {
           <div className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors max-w-full"
             >
               <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-xs font-semibold">
                 {initials}
@@ -90,7 +90,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <nav className="md:hidden grid grid-cols-5 gap-1 pb-2">
+        <nav className="md:hidden grid grid-cols-5 gap-0.5 min-[390px]:gap-1 pb-2 w-full max-w-full">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}

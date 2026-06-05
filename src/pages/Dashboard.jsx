@@ -151,15 +151,15 @@ export default function Dashboard() {
   if (loading) return <LoadingState />
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-5 sm:space-y-6 min-w-0 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div>
-        <h1 className="page-title">{greeting}, {name.split(' ')[0]} 👋</h1>
+      <div className="min-w-0">
+        <h1 className="page-title max-w-full">{greeting}, <span className="break-words">{name.split(' ')[0]}</span> 👋</h1>
         <p className="text-ink-muted mt-1 text-sm">Here's what's coming up for you.</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0">
         <StatCard
           label="Next Exam"
           value={nextExam ? (nextExam.course_code || nextExam.course_name || 'Exam') : 'None'}
@@ -191,22 +191,22 @@ export default function Dashboard() {
       </div>
 
       {/* Calendar */}
-      <section className="card overflow-hidden">
+      <section className="card overflow-hidden max-w-full">
         <div className="px-4 sm:px-5 py-3 sm:py-4 border-b border-surface-border">
           <h2 className="font-semibold text-ink">Current Month</h2>
           <p className="text-xs text-ink-faint mt-0.5">{monthTitle}</p>
         </div>
 
-        <div className="p-2.5 sm:p-5">
-          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center text-[10px] sm:text-[11px] font-medium text-ink-faint mb-1.5 sm:mb-2">
+        <div className="p-2 sm:p-5 max-w-full overflow-hidden">
+          <div className="grid grid-cols-7 gap-px sm:gap-1 text-center text-[9px] min-[390px]:text-[10px] sm:text-[11px] font-medium text-ink-faint mb-1.5 sm:mb-2">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <span key={day}>{day}</span>
+              <span key={day} className="truncate">{day}</span>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
+          <div className="grid grid-cols-7 gap-px sm:gap-1 max-w-full">
             {Array.from({ length: firstDayOffset }).map((_, index) => (
-              <div key={`empty-${index}`} className="h-8 sm:aspect-square" />
+              <div key={`empty-${index}`} className="h-7 min-[390px]:h-8 sm:aspect-square" />
             ))}
             {monthDays.map(date => {
               const dayItems = itemsByDate[date] || []
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   key={date}
                   type="button"
                   onClick={() => setSelectedDate(date)}
-                  className={`h-8 sm:aspect-square rounded-md sm:rounded-lg border text-xs sm:text-sm font-medium flex flex-col items-center justify-center gap-px sm:gap-0.5 transition-colors ${
+                  className={`h-7 min-[390px]:h-8 sm:aspect-square rounded sm:rounded-lg border text-[11px] sm:text-sm font-medium flex flex-col items-center justify-center gap-px sm:gap-0.5 transition-colors min-w-0 ${
                     isSelected
                       ? 'bg-brand-600 text-white border-brand-600'
                       : isToday
@@ -237,9 +237,9 @@ export default function Dashboard() {
             })}
           </div>
 
-          <div className="mt-3 sm:mt-4 rounded-xl bg-surface px-3 py-2.5 sm:py-3">
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <p className="text-sm font-medium text-ink">{formatDateNoYear(selectedDate)}</p>
+          <div className="mt-3 sm:mt-4 rounded-xl bg-surface px-3 py-2.5 sm:py-3 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <p className="text-sm font-medium text-ink min-w-0">{formatDateNoYear(selectedDate)}</p>
               {selectedItems.length > 0 && (
                 <p className="text-xs text-ink-faint">{selectedItems.length} item{selectedItems.length === 1 ? '' : 's'}</p>
               )}
@@ -250,7 +250,7 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-2">
                 {selectedItems.map(item => (
-                  <div key={`${item.type}-${item.id}`} className="flex items-start justify-between gap-3">
+                  <div key={`${item.type}-${item.id}`} className="flex flex-col min-[380px]:flex-row min-[380px]:items-start justify-between gap-2 min-w-0">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className={`badge ${typeBadge[item.type]} capitalize`}>{item.type}</span>
@@ -259,7 +259,7 @@ export default function Dashboard() {
                       {item.type === 'exam' && item.title && <p className="text-xs text-ink-faint mt-0.5 break-words">{item.title}</p>}
                       {item.type !== 'exam' && item.sub && <p className="text-xs text-ink-faint mt-0.5 break-words">{item.sub}</p>}
                     </div>
-                    {item.time && <p className="text-xs text-ink-faint flex-shrink-0 mt-1">{formatTime(item.time)}</p>}
+                    {item.time && <p className="text-xs text-ink-faint flex-shrink-0 min-[380px]:mt-1">{formatTime(item.time)}</p>}
                   </div>
                 ))}
               </div>
@@ -269,7 +269,7 @@ export default function Dashboard() {
       </section>
 
       {/* Quick links */}
-      <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
         {[
           { to: '/tasks', label: 'Add Task', color: 'amber' },
           { to: '/interviews', label: 'Add Interview', color: 'purple' },
@@ -289,8 +289,8 @@ export default function Dashboard() {
       </div>
 
       {/* Upcoming */}
-      <div className="card">
-        <div className="px-4 sm:px-5 py-4 border-b border-surface-border flex items-center justify-between gap-3">
+      <div className="card overflow-hidden">
+        <div className="px-4 sm:px-5 py-4 border-b border-surface-border flex items-center justify-between gap-3 min-w-0">
           <h2 className="font-semibold text-ink">Upcoming</h2>
           <Link to="/timeline" className="text-sm text-brand-600 hover:text-brand-700 font-medium whitespace-nowrap">
             View all →
@@ -305,7 +305,7 @@ export default function Dashboard() {
         ) : (
           <div className="divide-y divide-surface-border">
             {upcoming.map(item => (
-              <div key={item.type + item.id} className="px-4 sm:px-5 py-4 flex items-start gap-3">
+              <div key={item.type + item.id} className="px-4 sm:px-5 py-4 flex flex-col min-[420px]:flex-row min-[420px]:items-start gap-2 min-w-0">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 min-w-0">
                     <span className={`badge ${typeBadge[item.type]} capitalize flex-shrink-0`}>
@@ -315,7 +315,7 @@ export default function Dashboard() {
                   </div>
                   {item.sub && <p className="text-xs text-ink-faint leading-snug break-words mt-1 pl-0.5">{item.sub}</p>}
                 </div>
-                <div className="text-right flex-shrink-0 w-[84px]">
+                <div className="text-left min-[420px]:text-right flex-shrink-0 min-[420px]:w-[84px]">
                   <p className="text-xs sm:text-sm font-medium text-ink leading-snug">{formatDateNoYear(item.date)}</p>
                   {item.time && <p className="text-xs text-ink-faint">{formatTime(item.time)}</p>}
                 </div>

@@ -102,16 +102,16 @@ export default function Interviews() {
     : interviews
 
   return (
-    <div>
-      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
-        <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
+        <div className="min-w-0">
           <h1 className="page-title">Interviews</h1>
           <p className="text-sm text-ink-muted mt-0.5">{interviews.length} total · {interviews.filter(i => i.interview_date >= today).length} upcoming</p>
         </div>
         <button onClick={openAdd} className="btn-primary w-full min-[380px]:w-auto">+ Add Interview</button>
       </div>
 
-      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-fit">
+      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-full min-[380px]:w-fit overflow-x-auto">
         {[['upcoming', 'Upcoming'], ['all', 'All']].map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === val ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'}`}>
@@ -125,7 +125,7 @@ export default function Interviews() {
       ) : visible.length === 0 ? (
         <EmptyState text={filter === 'upcoming' ? 'No upcoming interviews.' : 'No interviews yet.'} action={<button onClick={openAdd} className="btn-primary mt-3">Add Interview</button>} />
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-3 min-w-0">
           {visible.map(item => (
             <ItemCard key={item.id} type="interview" item={item} onEdit={() => openEdit(item)} onDelete={() => handleDelete(item.id)} />
           ))}

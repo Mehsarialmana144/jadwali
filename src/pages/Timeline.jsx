@@ -105,15 +105,15 @@ export default function Timeline() {
   )
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
+        <div className="min-w-0">
           <h1 className="page-title">Timeline</h1>
           <p className="text-sm text-ink-muted mt-0.5">All your events in one view</p>
         </div>
         <button
           onClick={() => setShowPast(p => !p)}
-          className="btn-secondary text-sm"
+          className="btn-secondary text-sm w-full min-[380px]:w-auto"
         >
           {showPast ? 'Hide Past' : 'Show Past'}
         </button>
@@ -125,7 +125,7 @@ export default function Timeline() {
           <p className="text-sm text-ink-faint mt-1">Add exams, interviews, or tasks to see them here.</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-8 min-w-0">
           {dates.map(date => {
             const isToday = date === today
             const isPast = date < today
@@ -133,7 +133,7 @@ export default function Timeline() {
             return (
               <div key={date}>
                 {/* Date header */}
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3 min-w-0">
                   <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     isToday ? 'bg-brand-600 text-white' :
                     isPast  ? 'bg-slate-100 text-slate-500' :
@@ -141,17 +141,17 @@ export default function Timeline() {
                   }`}>
                     {isToday ? 'Today' : formatDate(date)}
                   </div>
-                  <div className="flex-1 h-px bg-surface-border" />
+                  <div className="flex-1 h-px bg-surface-border min-w-0" />
                 </div>
 
                 {/* Items for this date */}
-                <div className="space-y-2 pl-2">
+                <div className="space-y-2 pl-0 sm:pl-2 min-w-0">
                   {grouped[date].map(item => {
                     const meta = typeMeta[item.type]
                     return (
                       <div
                         key={item.id}
-                        className={`flex items-start gap-3 p-3.5 rounded-xl border border-surface-border bg-white ${item.done ? 'opacity-60' : ''}`}
+                        className={`flex items-start gap-3 p-3 sm:p-3.5 rounded-xl border border-surface-border bg-white min-w-0 ${item.done ? 'opacity-60' : ''}`}
                       >
                         {/* Dot */}
                         <div className="mt-1.5 flex-shrink-0">
@@ -160,11 +160,11 @@ export default function Timeline() {
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 flex-wrap">
-                            <p className={`font-medium text-sm ${item.done ? 'line-through text-ink-faint' : 'text-ink'}`}>
+                          <div className="flex flex-col min-[420px]:flex-row min-[420px]:items-start justify-between gap-2 min-w-0">
+                            <p className={`font-medium text-sm min-w-0 break-words ${item.done ? 'line-through text-ink-faint' : 'text-ink'}`}>
                               {item.title}
                             </p>
-                            <div className="flex gap-1 flex-shrink-0 flex-wrap">
+                            <div className="flex gap-1 flex-shrink-0 flex-wrap min-w-0">
                               <span className={`badge ${meta.bg} ${meta.text}`}>{meta.label}</span>
                               {item.badge && (
                                 <span className={`badge ${badgeColors[item.badge] || 'bg-slate-100 text-slate-600'} capitalize`}>
@@ -173,7 +173,7 @@ export default function Timeline() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 mt-1">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 min-w-0">
                             {item.time && (
                               <span className="text-xs text-ink-muted font-medium">{formatTime(item.time)}</span>
                             )}

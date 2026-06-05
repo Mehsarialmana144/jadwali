@@ -393,10 +393,10 @@ export default function Exams() {
   const invalidImportCount = skippedRows.length
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
-        <div>
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
+        <div className="min-w-0">
           <h1 className="page-title">Exams</h1>
           <p className="text-sm text-ink-muted mt-0.5">{exams.length} total · {exams.filter(e => e.exam_date >= today).length} upcoming</p>
         </div>
@@ -411,7 +411,7 @@ export default function Exams() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-fit">
+      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-full min-[380px]:w-fit overflow-x-auto">
         {[['upcoming', 'Upcoming'], ['all', 'All']].map(([val, label]) => (
           <button
             key={val}
@@ -427,28 +427,28 @@ export default function Exams() {
 
       {/* Import Schedule */}
       {showImport && (
-        <section className="card p-4 sm:p-5 mb-5">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-            <div>
+        <section className="card p-4 sm:p-5 mb-5 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4 min-w-0">
+            <div className="min-w-0">
               <h2 className="font-display text-lg font-semibold text-ink">Import Schedule</h2>
               <p className="text-sm text-ink-muted mt-1">
                 Paste the university exam table. Tabs are read first, then spaced columns or pipes.
               </p>
             </div>
             {importRows.length > 0 && (
-              <div className="flex gap-2 text-xs">
+              <div className="flex flex-wrap gap-2 text-xs">
                 <span className="badge bg-green-50 text-green-700">{validImportCount} valid</span>
                 {invalidImportCount > 0 && <span className="badge bg-red-50 text-red-700">{invalidImportCount} invalid</span>}
               </div>
             )}
           </div>
 
-          <div className="grid gap-3">
-            <details className="rounded-lg border border-surface-border bg-surface/60 p-3">
+          <div className="grid gap-3 min-w-0">
+            <details className="rounded-lg border border-surface-border bg-surface/60 p-3 min-w-0">
               <summary className="cursor-pointer text-sm font-medium text-ink">
                 How to import from Edugate?
               </summary>
-              <div className="mt-3 text-sm text-ink-muted">
+              <div className="mt-3 text-sm text-ink-muted min-w-0">
                 <h3 className="font-semibold text-ink mb-2">How to import your exam schedule</h3>
                 <ol className="list-decimal list-inside space-y-1">
                   <li>Open Edugate.</li>
@@ -468,10 +468,10 @@ export default function Exams() {
               </div>
             </details>
 
-            <div>
+            <div className="min-w-0">
               <label className="label">Paste exam schedule</label>
               <textarea
-                className="input min-h-36 resize-y"
+                className="input min-h-36 resize-y max-w-full"
                 value={importText}
                 onChange={e => {
                   setImportText(e.target.value)
@@ -500,10 +500,10 @@ export default function Exams() {
             )}
 
             {importRows.length > 0 && (
-              <div className="grid gap-3">
+              <div className="grid gap-3 min-w-0">
                 {importableRows.length > 0 && (
-                  <div className="hidden md:block overflow-x-auto border border-surface-border rounded-lg">
-                    <table className="w-full text-sm">
+                  <div className="hidden md:block overflow-x-auto max-w-full border border-surface-border rounded-lg">
+                    <table className="w-full min-w-[720px] text-sm">
                       <thead className="bg-surface text-ink-muted">
                         <tr>
                           {IMPORT_COLUMNS.map(column => (
@@ -515,7 +515,7 @@ export default function Exams() {
                         {importableRows.map(row => (
                           <tr key={row.id} className="bg-white">
                             {IMPORT_COLUMNS.map(column => (
-                              <td key={column} className="px-3 py-2 align-top text-ink">{row.data[column] || '—'}</td>
+                              <td key={column} className="px-3 py-2 align-top text-ink break-words">{row.data[column] || '—'}</td>
                             ))}
                           </tr>
                         ))}
@@ -526,13 +526,13 @@ export default function Exams() {
 
                 <div className="grid gap-2 md:hidden">
                   {importableRows.map(row => (
-                    <div key={row.id} className="rounded-lg border p-3 bg-white border-surface-border">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <div>
+                    <div key={row.id} className="rounded-lg border p-3 bg-white border-surface-border min-w-0">
+                      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-start justify-between gap-2 mb-2 min-w-0">
+                        <div className="min-w-0">
                           <p className="font-medium text-ink">{row.data.course_name || 'Missing course name'}</p>
                           <p className="text-xs text-ink-muted">{row.data.course_code || 'No course code'}</p>
                         </div>
-                        <span className="badge flex-shrink-0 bg-green-50 text-green-700">Ready</span>
+                        <span className="badge flex-shrink-0 bg-green-50 text-green-700 w-fit">Ready</span>
                       </div>
                       <div className="grid grid-cols-1 min-[360px]:grid-cols-2 gap-2 text-xs text-ink-muted">
                         <p><span className="font-medium text-ink">Date:</span> {row.data.exam_date || '—'}</p>
@@ -544,11 +544,11 @@ export default function Exams() {
                 </div>
 
                 {skippedRows.length > 0 && (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 min-w-0">
                     <h3 className="text-sm font-semibold text-amber-900">Skipped rows</h3>
                     <div className="grid gap-1.5 mt-2">
                       {skippedRows.map(row => (
-                        <p key={row.id} className="text-xs text-amber-900">
+                        <p key={row.id} className="text-xs text-amber-900 break-words">
                           Skipped: {row.data.course_name || row.line || `Row ${row.rowNumber}`} — no final exam date/time
                         </p>
                       ))}
@@ -581,7 +581,7 @@ export default function Exams() {
           action={<button onClick={openAdd} className="btn-primary mt-3">Add Exam</button>}
         />
       ) : (
-        <div className="grid gap-3">
+        <div className="grid gap-3 min-w-0">
           {visible.map(exam => (
             <ItemCard
               key={exam.id}

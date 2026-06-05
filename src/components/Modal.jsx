@@ -11,7 +11,7 @@ export default function Modal({ title, onClose, children }) {
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 overflow-x-hidden">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
@@ -19,10 +19,10 @@ export default function Modal({ title, onClose, children }) {
       />
 
       {/* Panel */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-border sticky top-0 bg-white rounded-t-2xl z-10">
-          <h2 className="font-display font-semibold text-ink">{title}</h2>
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-surface-border sticky top-0 bg-white rounded-t-2xl z-10 min-w-0">
+          <h2 className="font-display font-semibold text-ink min-w-0 break-words">{title}</h2>
           <button
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface text-ink-muted transition-colors"
@@ -34,7 +34,7 @@ export default function Modal({ title, onClose, children }) {
         </div>
 
         {/* Body */}
-        <div className="px-5 py-5">
+        <div className="px-4 sm:px-5 py-5 min-w-0">
           {children}
         </div>
       </div>
