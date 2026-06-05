@@ -27,7 +27,7 @@ export default function Navbar() {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <header className="app-frame bg-white border-b border-surface-border sticky top-0 z-30">
+    <header className="w-full max-w-full bg-white border-b border-surface-border sticky top-0 z-30">
       <div className="app-container">
         <div className="flex items-center justify-between h-14 min-w-0 gap-2">
           {/* Logo */}
@@ -72,7 +72,7 @@ export default function Navbar() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-[min(19rem,calc(100vw-2rem))] bg-white border border-surface-border rounded-xl shadow-lg py-1 z-40">
+              <div className="absolute right-0 top-full mt-2 w-[min(19rem,calc(100vw-1.5rem))] max-w-[calc(100vw-1.5rem)] bg-white border border-surface-border rounded-xl shadow-lg py-1 z-50">
                 <div className="px-3 py-2 border-b border-surface-border min-w-0">
                   <p className="text-sm font-medium text-ink break-words">{name}</p>
                   <p className="text-xs text-ink-faint break-all mt-0.5">{session?.user?.email}</p>

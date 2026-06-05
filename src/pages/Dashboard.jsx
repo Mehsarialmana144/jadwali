@@ -198,43 +198,45 @@ export default function Dashboard() {
         </div>
 
         <div className="p-2 sm:p-5 max-w-full overflow-hidden">
-          <div className="grid grid-cols-7 gap-px sm:gap-1 text-center text-[9px] min-[390px]:text-[10px] sm:text-[11px] font-medium text-ink-faint mb-1.5 sm:mb-2">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-              <span key={day} className="truncate">{day}</span>
-            ))}
-          </div>
+          <div className="w-full max-w-3xl mx-auto">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[9px] min-[390px]:text-[10px] sm:text-xs font-medium text-ink-faint mb-1.5 sm:mb-3">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                <span key={day} className="truncate">{day}</span>
+              ))}
+            </div>
 
-          <div className="grid grid-cols-7 gap-px sm:gap-1 max-w-full">
-            {Array.from({ length: firstDayOffset }).map((_, index) => (
-              <div key={`empty-${index}`} className="h-7 min-[390px]:h-8 sm:aspect-square" />
-            ))}
-            {monthDays.map(date => {
-              const dayItems = itemsByDate[date] || []
-              const isMarked = dayItems.length > 0
-              const isSelected = date === selectedDate
-              const isToday = date === today
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 max-w-full">
+              {Array.from({ length: firstDayOffset }).map((_, index) => (
+                <div key={`empty-${index}`} className="w-full aspect-square" />
+              ))}
+              {monthDays.map(date => {
+                const dayItems = itemsByDate[date] || []
+                const isMarked = dayItems.length > 0
+                const isSelected = date === selectedDate
+                const isToday = date === today
 
-              return (
-                <button
-                  key={date}
-                  type="button"
-                  onClick={() => setSelectedDate(date)}
-                  className={`h-7 min-[390px]:h-8 sm:aspect-square rounded sm:rounded-lg border text-[11px] sm:text-sm font-medium flex flex-col items-center justify-center gap-px sm:gap-0.5 transition-colors min-w-0 ${
-                    isSelected
-                      ? 'bg-brand-600 text-white border-brand-600'
-                      : isToday
-                        ? 'bg-brand-50 text-brand-700 border-brand-200'
-                        : 'bg-white text-ink border-surface-border hover:bg-surface'
-                  }`}
-                  aria-label={`${formatDateNoYear(date)}${isMarked ? `, ${dayItems.length} item${dayItems.length === 1 ? '' : 's'}` : ''}`}
-                >
-                  <span>{Number(date.slice(-2))}</span>
-                  {isMarked && (
-                    <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-brand-500'}`} />
-                  )}
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={date}
+                    type="button"
+                    onClick={() => setSelectedDate(date)}
+                    className={`w-full aspect-square rounded-md sm:rounded-xl border text-[11px] sm:text-sm md:text-base font-medium flex flex-col items-center justify-center gap-px sm:gap-1 transition-colors min-w-0 ${
+                      isSelected
+                        ? 'bg-brand-600 text-white border-brand-600'
+                        : isToday
+                          ? 'bg-brand-50 text-brand-700 border-brand-200'
+                          : 'bg-white text-ink border-surface-border hover:bg-surface'
+                    }`}
+                    aria-label={`${formatDateNoYear(date)}${isMarked ? `, ${dayItems.length} item${dayItems.length === 1 ? '' : 's'}` : ''}`}
+                  >
+                    <span>{Number(date.slice(-2))}</span>
+                    {isMarked && (
+                      <span className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-brand-500'}`} />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
 
           <div className="mt-3 sm:mt-4 rounded-xl bg-surface px-3 py-2.5 sm:py-3 min-w-0">
