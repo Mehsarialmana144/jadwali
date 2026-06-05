@@ -103,12 +103,12 @@ export default function Interviews() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="page-title">Interviews</h1>
           <p className="text-sm text-ink-muted mt-0.5">{interviews.length} total · {interviews.filter(i => i.interview_date >= today).length} upcoming</p>
         </div>
-        <button onClick={openAdd} className="btn-primary">+ Add Interview</button>
+        <button onClick={openAdd} className="btn-primary w-full min-[380px]:w-auto">+ Add Interview</button>
       </div>
 
       <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-fit">
@@ -135,12 +135,12 @@ export default function Interviews() {
       {modal && (
         <Modal title={modal === 'add' ? 'Add Interview' : 'Edit Interview'} onClose={closeModal}>
           <form onSubmit={handleSave} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
                 <label className="label">Company Name *</label>
                 <input name="company_name" className="input" placeholder="e.g. Google" value={form.company_name} onChange={handleChange} required />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Position Title</label>
                 <input name="position_title" className="input" placeholder="e.g. Software Engineer Intern" value={form.position_title} onChange={handleChange} />
               </div>
@@ -152,7 +152,7 @@ export default function Interviews() {
                 <label className="label">Interview Time</label>
                 <input name="interview_time" type="time" className="input" value={form.interview_time} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Interview Type</label>
                 <select name="interview_type" className="input" value={form.interview_type} onChange={handleChange}>
                   <option value="">Select…</option>
@@ -161,15 +161,15 @@ export default function Interviews() {
                   <option value="phone">Phone</option>
                 </select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Location / Link</label>
                 <input name="location_or_link" className="input" placeholder="e.g. Zoom link or office address" value={form.location_or_link} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Preparation Notes</label>
                 <textarea name="preparation_notes" className="input resize-none" rows={2} placeholder="What to prepare…" value={form.preparation_notes} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Notes</label>
                 <textarea name="notes" className="input resize-none" rows={2} placeholder="Any other notes…" value={form.notes} onChange={handleChange} />
               </div>
@@ -177,7 +177,7 @@ export default function Interviews() {
 
             {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-            <div className="flex gap-2 justify-end pt-1">
+            <div className="flex flex-col min-[380px]:flex-row gap-2 justify-end pt-1">
               <button type="button" onClick={closeModal} className="btn-secondary">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving…' : 'Save'}</button>
             </div>

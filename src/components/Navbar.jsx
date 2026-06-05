@@ -27,11 +27,11 @@ export default function Navbar() {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <header className="bg-white border-b border-surface-border sticky top-0 z-30">
-      <div className="max-w-5xl mx-auto px-4">
+    <header className="bg-white border-b border-surface-border sticky top-0 z-30 overflow-hidden">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <NavLink to="/dashboard" className="flex items-center gap-2">
+          <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold font-display">J</span>
             </div>
@@ -59,7 +59,7 @@ export default function Navbar() {
           </nav>
 
           {/* User Menu */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen(o => !o)}
               className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface transition-colors"
@@ -90,13 +90,13 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <nav className="md:hidden flex gap-1 overflow-x-auto pb-2 -mx-1 px-1">
+        <nav className="mobile-nav-scroll md:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-3 px-3">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                `flex-shrink-0 max-w-[34vw] flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                   isActive
                     ? 'bg-brand-50 text-brand-700'
                     : 'text-ink-muted hover:text-ink hover:bg-surface'
@@ -104,7 +104,7 @@ export default function Navbar() {
               }
             >
               <Icon className="w-3.5 h-3.5" />
-              {label}
+              <span className="truncate">{label}</span>
             </NavLink>
           ))}
         </nav>

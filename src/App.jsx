@@ -18,9 +18,9 @@ export function useAuth() {
 
 function AppLayout({ children }) {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface overflow-x-hidden">
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8 overflow-x-hidden">
         {children}
       </main>
     </div>

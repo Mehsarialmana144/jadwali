@@ -111,16 +111,16 @@ export default function Tasks() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="page-title">Tasks</h1>
           <p className="text-sm text-ink-muted mt-0.5">{counts.active} active · {counts.done} done</p>
         </div>
-        <button onClick={openAdd} className="btn-primary">+ Add Task</button>
+        <button onClick={openAdd} className="btn-primary w-full min-[380px]:w-auto">+ Add Task</button>
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-fit">
+      <div className="flex gap-1 mb-5 bg-surface border border-surface-border p-1 rounded-lg w-full min-[380px]:w-fit overflow-x-auto">
         {[['active', `Active (${counts.active})`], ['done', `Done (${counts.done})`], ['all', 'All']].map(([val, label]) => (
           <button key={val} onClick={() => setFilter(val)}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${filter === val ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'}`}>
@@ -149,8 +149,8 @@ export default function Tasks() {
       {modal && (
         <Modal title={modal === 'add' ? 'Add Task' : 'Edit Task'} onClose={closeModal}>
           <form onSubmit={handleSave} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
                 <label className="label">Title *</label>
                 <input name="title" className="input" placeholder="Task title" value={form.title} onChange={handleChange} required />
               </div>
@@ -181,7 +181,7 @@ export default function Tasks() {
                   <option value="high">High</option>
                 </select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Status</label>
                 <select name="status" className="input" value={form.status} onChange={handleChange}>
                   <option value="todo">To Do</option>
@@ -189,7 +189,7 @@ export default function Tasks() {
                   <option value="done">Done</option>
                 </select>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Notes</label>
                 <textarea name="notes" className="input resize-none" rows={2} placeholder="Any notes…" value={form.notes} onChange={handleChange} />
               </div>
@@ -197,7 +197,7 @@ export default function Tasks() {
 
             {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-            <div className="flex gap-2 justify-end pt-1">
+            <div className="flex flex-col min-[380px]:flex-row gap-2 justify-end pt-1">
               <button type="button" onClick={closeModal} className="btn-secondary">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving…' : 'Save'}</button>
             </div>

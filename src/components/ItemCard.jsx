@@ -41,7 +41,7 @@ export default function ItemCard({ type, item, onEdit, onDelete, onStatusChange 
 
 function CardShell({ children, accentColor = 'border-brand-200' }) {
   return (
-    <div className={`card p-4 border-l-4 ${accentColor} hover:shadow-md transition-shadow duration-150`}>
+    <div className={`card p-4 border-l-4 ${accentColor} hover:shadow-md transition-shadow duration-150 min-w-0`}>
       {children}
     </div>
   )
@@ -49,7 +49,7 @@ function CardShell({ children, accentColor = 'border-brand-200' }) {
 
 function CardActions({ onEdit, onDelete }) {
   return (
-    <div className="flex gap-1 mt-3 pt-3 border-t border-surface-border">
+    <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-surface-border">
       <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1.5">Edit</button>
       <button onClick={onDelete} className="btn-danger text-xs px-3 py-1.5">Delete</button>
     </div>
@@ -60,8 +60,8 @@ function ExamCard({ item, onEdit, onDelete }) {
   return (
     <CardShell accentColor="border-brand-300">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-medium text-ink">{item.course_name}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-ink truncate">{item.course_name}</p>
           {item.course_code && <p className="text-xs text-ink-muted mt-0.5">{item.course_code}</p>}
         </div>
         {item.difficulty && (
@@ -94,8 +94,8 @@ function InterviewCard({ item, onEdit, onDelete }) {
   return (
     <CardShell accentColor="border-purple-300">
       <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-medium text-ink">{item.company_name}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-ink truncate">{item.company_name}</p>
           {item.position_title && <p className="text-xs text-ink-muted mt-0.5">{item.position_title}</p>}
         </div>
         {item.interview_type && (
@@ -119,11 +119,11 @@ function InterviewCard({ item, onEdit, onDelete }) {
 function TaskCard({ item, onEdit, onDelete, onStatusChange }) {
   return (
     <CardShell accentColor={item.status === 'done' ? 'border-green-300' : 'border-amber-300'}>
-      <div className="flex items-start justify-between gap-2">
-        <p className={`font-medium ${item.status === 'done' ? 'line-through text-ink-faint' : 'text-ink'}`}>
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-start justify-between gap-2">
+        <p className={`font-medium min-w-0 truncate ${item.status === 'done' ? 'line-through text-ink-faint' : 'text-ink'}`}>
           {item.title}
         </p>
-        <div className="flex gap-1 flex-shrink-0">
+        <div className="flex flex-wrap gap-1 flex-shrink-0">
           {item.priority && (
             <span className={`badge ${priorityColor[item.priority]} capitalize`}>{item.priority}</span>
           )}

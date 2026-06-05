@@ -3,7 +3,21 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
 import StatCard from '../components/StatCard'
-import { relativeDate, formatTime, todayStr, isFutureOrToday } from '../lib/dateUtils'
+import { relativeDate, formatTime, todayStr } from '../lib/dateUtils'
+
+function dateTimeValue(date, time) {
+  return `${date || ''}T${time || '00:00'}`
+}
+
+function shortDateTime(date, time) {
+  if (!date) return ''
+  return [relativeDate(date), time ? formatTime(time) : ''].filter(Boolean).join(' · ')
+}
+
+function interviewMainValue(interview) {
+  if (!interview) return 'None'
+  return interview.company_name || interview.position_title || 'Interview'
+}
 
 export default function Dashboard() {
   const { session } = useAuth()
@@ -35,12 +49,12 @@ export default function Dashboard() {
   // Next exam (future or today)
   const nextExam = data.exams
     .filter(e => e.exam_date >= today)
-    .sort((a, b) => a.exam_date.localeCompare(b.exam_date))[0]
+    .sort((a, b) => dateTimeValue(a.exam_date, a.exam_time).localeCompare(dateTimeValue(b.exam_date, b.exam_time)))[0]
 
   // Next interview
   const nextInterview = data.interviews
     .filter(i => i.interview_date >= today)
-    .sort((a, b) => a.interview_date.localeCompare(b.interview_date))[0]
+    .sort((a, b) => dateTimeValue(a.interview_date, a.interview_time).localeCompare(dateTimeValue(b.interview_date, b.interview_time)))[0]
 
   // Tasks due today
   const dueTodayCount = data.tasks.filter(
@@ -66,9 +80,7 @@ export default function Dashboard() {
     })),
   ]
     .sort((a, b) => {
-      const da = a.date + 'T' + (a.time || '00:00')
-      const db = b.date + 'T' + (b.time || '00:00')
-      return da.localeCompare(db)
+      return dateTimeValue(a.date, a.time).localeCompare(dateTimeValue(b.date, b.time))
     })
     .slice(0, 5)
 
@@ -94,18 +106,18 @@ export default function Dashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <StatCard
           label="Next Exam"
-          value={nextExam ? relativeDate(nextExam.exam_date) : 'None'}
-          sub={nextExam ? nextExam.course_name : 'No upcoming exams'}
+          value={nextExam ? (nextExam.course_code || nextExam.course_name || 'Exam') : 'None'}
+          sub={nextExam ? shortDateTime(nextExam.exam_date, nextExam.exam_time) : 'No upcoming exams'}
           color="brand"
           icon={<BookIcon />}
         />
         <StatCard
           label="Next Interview"
-          value={nextInterview ? relativeDate(nextInterview.interview_date) : 'None'}
-          sub={nextInterview ? nextInterview.company_name : 'No upcoming interviews'}
+          value={interviewMainValue(nextInterview)}
+          sub={nextInterview ? shortDateTime(nextInterview.interview_date, nextInterview.interview_time) : 'No upcoming interviews'}
           color="purple"
           icon={<BriefcaseIcon />}
         />
@@ -127,9 +139,9 @@ export default function Dashboard() {
 
       {/* Upcoming */}
       <div className="card">
-        <div className="px-5 py-4 border-b border-surface-border flex items-center justify-between">
+        <div className="px-4 sm:px-5 py-4 border-b border-surface-border flex items-center justify-between gap-3">
           <h2 className="font-semibold text-ink">Upcoming</h2>
-          <Link to="/timeline" className="text-sm text-brand-600 hover:text-brand-700 font-medium">
+          <Link to="/timeline" className="text-sm text-brand-600 hover:text-brand-700 font-medium whitespace-nowrap">
             View all →
           </Link>
         </div>
@@ -142,16 +154,18 @@ export default function Dashboard() {
         ) : (
           <div className="divide-y divide-surface-border">
             {upcoming.map(item => (
-              <div key={item.type + item.id} className="px-5 py-3.5 flex items-center gap-3">
-                <span className={`badge ${typeBadge[item.type]} capitalize flex-shrink-0`}>
-                  {item.type}
-                </span>
+              <div key={item.type + item.id} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-ink truncate">{item.title}</p>
-                  {item.sub && <p className="text-xs text-ink-faint truncate">{item.sub}</p>}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className={`badge ${typeBadge[item.type]} capitalize flex-shrink-0`}>
+                      {item.type}
+                    </span>
+                    <p className="text-sm font-medium text-ink truncate">{item.title || item.sub || item.type}</p>
+                  </div>
+                  {item.sub && <p className="text-xs text-ink-faint truncate mt-1 pl-0.5">{item.sub}</p>}
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-medium text-ink">{relativeDate(item.date)}</p>
+                <div className="text-right flex-shrink-0 max-w-[34%]">
+                  <p className="text-sm font-medium text-ink truncate">{relativeDate(item.date)}</p>
                   {item.time && <p className="text-xs text-ink-faint">{formatTime(item.time)}</p>}
                 </div>
               </div>
@@ -161,7 +175,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick links */}
-      <div className="grid grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-3 gap-3 mt-4">
         {[
           { to: '/exams', label: 'Add Exam', color: 'brand' },
           { to: '/interviews', label: 'Add Interview', color: 'purple' },

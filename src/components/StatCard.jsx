@@ -9,15 +9,15 @@ export default function StatCard({ label, value, sub, color = 'brand', icon }) {
   const c = colorMap[color] || colorMap.brand
 
   return (
-    <div className={`card p-5 flex items-start gap-4`}>
+    <div className="card p-4 sm:p-5 flex items-start gap-3 sm:gap-4 min-w-0">
       {icon && (
-        <div className={`w-10 h-10 rounded-lg ${c.bg} flex items-center justify-center flex-shrink-0`}>
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg ${c.bg} flex items-center justify-center flex-shrink-0`}>
           <span className={c.icon}>{icon}</span>
         </div>
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p className="text-xs font-medium text-ink-muted uppercase tracking-wide">{label}</p>
-        <p className={`text-2xl font-semibold mt-0.5 ${c.text} truncate`}>{value}</p>
+        <p className={`text-xl sm:text-2xl font-semibold mt-0.5 ${c.text} truncate`}>{value}</p>
         {sub && <p className="text-xs text-ink-faint mt-0.5 truncate">{sub}</p>}
       </div>
     </div>

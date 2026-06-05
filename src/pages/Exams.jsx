@@ -110,12 +110,12 @@ export default function Exams() {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="page-title">Exams</h1>
           <p className="text-sm text-ink-muted mt-0.5">{exams.length} total · {exams.filter(e => e.exam_date >= today).length} upcoming</p>
         </div>
-        <button onClick={openAdd} className="btn-primary">
+        <button onClick={openAdd} className="btn-primary w-full min-[380px]:w-auto">
           + Add Exam
         </button>
       </div>
@@ -161,8 +161,8 @@ export default function Exams() {
       {modal && (
         <Modal title={modal === 'add' ? 'Add Exam' : 'Edit Exam'} onClose={closeModal}>
           <form onSubmit={handleSave} className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="sm:col-span-2">
                 <label className="label">Course Name *</label>
                 <input name="course_name" className="input" placeholder="e.g. Data Structures" value={form.course_name} onChange={handleChange} required />
               </div>
@@ -187,15 +187,15 @@ export default function Exams() {
                 <label className="label">Exam Time</label>
                 <input name="exam_time" type="time" className="input" value={form.exam_time} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Location</label>
                 <input name="location" className="input" placeholder="e.g. Hall B, Room 204" value={form.location} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Study Topics</label>
                 <textarea name="study_topics" className="input resize-none" rows={2} placeholder="Topics to cover…" value={form.study_topics} onChange={handleChange} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Notes</label>
                 <textarea name="notes" className="input resize-none" rows={2} placeholder="Any other notes…" value={form.notes} onChange={handleChange} />
               </div>
@@ -203,7 +203,7 @@ export default function Exams() {
 
             {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-            <div className="flex gap-2 justify-end pt-1">
+            <div className="flex flex-col min-[380px]:flex-row gap-2 justify-end pt-1">
               <button type="button" onClick={closeModal} className="btn-secondary">Cancel</button>
               <button type="submit" disabled={saving} className="btn-primary">
                 {saving ? 'Saving…' : 'Save'}
