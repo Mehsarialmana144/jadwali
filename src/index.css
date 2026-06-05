@@ -13,10 +13,13 @@
 
   body {
     min-width: 0;
+    position: relative;
   }
 
   html {
     @apply font-sans text-ink bg-surface antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   * {
@@ -74,7 +77,36 @@
   }
 
   .page-title {
-    @apply font-display text-xl sm:text-2xl font-semibold text-ink leading-tight break-words;
+    @apply font-display text-lg min-[380px]:text-xl sm:text-2xl font-semibold text-ink leading-tight break-words;
+  }
+
+  .app-frame {
+    @apply w-full max-w-full overflow-x-hidden;
+  }
+
+  .app-container {
+    @apply w-full max-w-5xl mx-auto px-3 sm:px-4 min-w-0;
+  }
+
+  @supports (width: 100dvw) {
+    .app-frame {
+      width: 100dvw;
+      max-width: 100dvw;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: min(64rem, 100dvw);
+    }
+  }
+
+  @supports (overflow: clip) {
+    html,
+    body,
+    #root,
+    .app-frame {
+      overflow-x: clip;
+    }
   }
 
 }

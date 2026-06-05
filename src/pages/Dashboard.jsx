@@ -153,13 +153,13 @@ export default function Dashboard() {
   return (
     <div className="space-y-5 sm:space-y-6 min-w-0 max-w-full overflow-x-hidden">
       {/* Header */}
-      <div className="min-w-0">
-        <h1 className="page-title max-w-full">{greeting}, <span className="break-words">{name.split(' ')[0]}</span> 👋</h1>
+      <div className="min-w-0 max-w-full overflow-hidden">
+        <h1 className="page-title max-w-full text-pretty">{greeting}, <span className="break-words">{name.split(' ')[0]}</span> 👋</h1>
         <p className="text-ink-muted mt-1 text-sm">Here's what's coming up for you.</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0 max-w-full">
         <StatCard
           label="Next Exam"
           value={nextExam ? (nextExam.course_code || nextExam.course_name || 'Exam') : 'None'}
