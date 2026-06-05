@@ -9,6 +9,7 @@ function dateTimeValue(date, time) {
   return `${date || ''}T${time || '00:00'}`
 }
 
+
 function shortDateTime(date, time) {
   if (!date) return ''
   return [formatDateNoYear(date), time ? formatTime(time) : ''].filter(Boolean).join(' · ')
