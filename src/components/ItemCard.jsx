@@ -32,6 +32,13 @@ const categoryColor = {
   other:      'bg-slate-100 text-slate-600',
 }
 
+function normalizeUrl(url) {
+  if (!url) return ''
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+}
+
 export default function ItemCard({ type, item, onEdit, onDelete, onStatusChange }) {
   if (type === 'exam') return <ExamCard item={item} onEdit={onEdit} onDelete={onDelete} />
   if (type === 'interview') return <InterviewCard item={item} onEdit={onEdit} onDelete={onDelete} />
@@ -61,7 +68,7 @@ function ExamCard({ item, onEdit, onDelete }) {
     <CardShell accentColor="border-brand-300">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-medium text-ink truncate">{item.course_name}</p>
+          <p className="font-medium text-ink leading-snug break-words">{item.course_name}</p>
           {item.course_code && <p className="text-xs text-ink-muted mt-0.5">{item.course_code}</p>}
         </div>
         {item.difficulty && (
@@ -91,12 +98,14 @@ function InterviewCard({ item, onEdit, onDelete }) {
     online: 'bg-blue-50 text-blue-700',
     phone:  'bg-purple-50 text-purple-700',
   }
+  const interviewLink = normalizeUrl(item.location_or_link)
+
   return (
     <CardShell accentColor="border-purple-300">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-medium text-ink truncate">{item.company_name}</p>
-          {item.position_title && <p className="text-xs text-ink-muted mt-0.5">{item.position_title}</p>}
+          <p className="font-medium text-ink leading-snug break-words">{item.company_name}</p>
+          {item.position_title && <p className="text-xs text-ink-muted leading-snug break-words mt-0.5">{item.position_title}</p>}
         </div>
         {item.interview_type && (
           <span className={`badge ${typeColor[item.interview_type] || 'bg-slate-100 text-slate-600'} capitalize flex-shrink-0`}>
@@ -104,12 +113,25 @@ function InterviewCard({ item, onEdit, onDelete }) {
           </span>
         )}
       </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
         <p className="text-sm text-ink-muted">
           <span className="font-medium text-ink">{relativeDate(item.interview_date)}</span>
           {item.interview_time && <span> · {formatTime(item.interview_time)}</span>}
         </p>
-        {item.location_or_link && <p className="text-sm text-ink-muted truncate max-w-[200px]">{item.location_or_link}</p>}
+        {interviewLink && (
+          <p className="text-xs font-medium text-purple-700 bg-purple-50 rounded-md px-2 py-1">
+            Interview link available
+          </p>
+        )}
+        {interviewLink && (
+          <button
+            type="button"
+            onClick={() => window.open(interviewLink, '_blank', 'noopener,noreferrer')}
+            className="btn-secondary text-xs px-3 py-1.5"
+          >
+            Open Link
+          </button>
+        )}
       </div>
       <CardActions onEdit={onEdit} onDelete={onDelete} />
     </CardShell>
@@ -120,7 +142,7 @@ function TaskCard({ item, onEdit, onDelete, onStatusChange }) {
   return (
     <CardShell accentColor={item.status === 'done' ? 'border-green-300' : 'border-amber-300'}>
       <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-start justify-between gap-2">
-        <p className={`font-medium min-w-0 truncate ${item.status === 'done' ? 'line-through text-ink-faint' : 'text-ink'}`}>
+        <p className={`font-medium min-w-0 leading-snug break-words ${item.status === 'done' ? 'line-through text-ink-faint' : 'text-ink'}`}>
           {item.title}
         </p>
         <div className="flex flex-wrap gap-1 flex-shrink-0">

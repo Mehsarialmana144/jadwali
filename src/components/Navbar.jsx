@@ -27,7 +27,7 @@ export default function Navbar() {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <header className="bg-white border-b border-surface-border sticky top-0 z-30 overflow-hidden">
+    <header className="bg-white border-b border-surface-border sticky top-0 z-30">
       <div className="max-w-5xl mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
@@ -72,15 +72,15 @@ export default function Navbar() {
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-surface-border rounded-xl shadow-lg py-1 z-40">
-                <div className="px-3 py-2 border-b border-surface-border">
-                  <p className="text-xs font-medium text-ink truncate">{name}</p>
-                  <p className="text-xs text-ink-faint truncate">{session?.user?.email}</p>
+              <div className="absolute right-0 top-full mt-1 w-[min(19rem,calc(100vw-2rem))] bg-white border border-surface-border rounded-xl shadow-lg py-1 z-40">
+                <div className="px-3 py-2 border-b border-surface-border min-w-0">
+                  <p className="text-sm font-medium text-ink break-words">{name}</p>
+                  <p className="text-xs text-ink-faint break-all mt-0.5">{session?.user?.email}</p>
                 </div>
                 <button
                   onClick={handleSignOut}
                   disabled={signingOut}
-                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  className="w-full text-left px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                 >
                   {signingOut ? 'Signing out…' : 'Sign Out'}
                 </button>
@@ -90,13 +90,13 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Nav */}
-        <nav className="mobile-nav-scroll md:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-3 px-3">
+        <nav className="md:hidden grid grid-cols-5 gap-1 pb-2">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex-shrink-0 max-w-[34vw] flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+                `min-w-0 flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 rounded-lg text-[10px] min-[390px]:text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-brand-50 text-brand-700'
                     : 'text-ink-muted hover:text-ink hover:bg-surface'
@@ -104,7 +104,7 @@ export default function Navbar() {
               }
             >
               <Icon className="w-3.5 h-3.5" />
-              <span className="truncate">{label}</span>
+              <span className="max-w-full truncate leading-tight">{label}</span>
             </NavLink>
           ))}
         </nav>

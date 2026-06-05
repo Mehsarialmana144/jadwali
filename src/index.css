@@ -68,15 +68,4 @@
     @apply font-display text-2xl font-semibold text-ink;
   }
 
-  .mobile-nav-scroll {
-    max-width: 100%;
-    overscroll-behavior-x: contain;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .mobile-nav-scroll::-webkit-scrollbar {
-    display: none;
-  }
 }

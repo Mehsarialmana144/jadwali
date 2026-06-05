@@ -178,7 +178,7 @@ export default function Timeline() {
                               <span className="text-xs text-ink-muted font-medium">{formatTime(item.time)}</span>
                             )}
                             {item.sub && (
-                              <span className="text-xs text-ink-faint truncate">{item.sub}</span>
+                              <span className="text-xs sm:text-sm text-ink-muted leading-snug break-words">{item.sub}</span>
                             )}
                           </div>
                         </div>
