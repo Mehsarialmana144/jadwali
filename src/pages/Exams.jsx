@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
 import ItemCard from '../components/ItemCard'
 import Modal from '../components/Modal'
-import { todayStr } from '../lib/dateUtils'
+import { isFutureDateTime, todayStr } from '../lib/dateUtils'
 
 const EMPTY = {
   course_name: '', course_code: '', exam_date: '', exam_time: '',
@@ -384,8 +384,9 @@ export default function Exams() {
   }
 
   const today = todayStr()
+  const upcomingExams = exams.filter(e => isFutureDateTime(e.exam_date, e.exam_time))
   const visible = filter === 'upcoming'
-    ? exams.filter(e => e.exam_date >= today)
+    ? upcomingExams
     : exams
   const importableRows = importRows.filter(row => row.valid)
   const skippedRows = importRows.filter(row => !row.valid)
@@ -398,7 +399,7 @@ export default function Exams() {
       <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
         <div className="min-w-0">
           <h1 className="page-title">Exams</h1>
-          <p className="text-sm text-ink-muted mt-0.5">{exams.length} total · {exams.filter(e => e.exam_date >= today).length} upcoming</p>
+          <p className="text-sm text-ink-muted mt-0.5">{exams.length} total · {upcomingExams.length} upcoming</p>
         </div>
         <div className="flex flex-col min-[380px]:flex-row gap-2 w-full min-[380px]:w-auto">
           <button onClick={() => setShowImport(value => !value)} className="btn-secondary w-full min-[380px]:w-auto">

@@ -1,4 +1,5 @@
 import { relativeDate, formatTime } from '../lib/dateUtils'
+import ExamCountdown from './ExamCountdown'
 
 const difficultyColor = {
   easy:   'bg-green-50 text-green-700',
@@ -39,9 +40,9 @@ function normalizeUrl(url) {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
 }
 
-export default function ItemCard({ type, item, onEdit, onDelete, onStatusChange }) {
+export default function ItemCard({ type, item, onEdit, onDelete, onStatusChange, onReview }) {
   if (type === 'exam') return <ExamCard item={item} onEdit={onEdit} onDelete={onDelete} />
-  if (type === 'interview') return <InterviewCard item={item} onEdit={onEdit} onDelete={onDelete} />
+  if (type === 'interview') return <InterviewCard item={item} onEdit={onEdit} onDelete={onDelete} onReview={onReview} />
   if (type === 'task') return <TaskCard item={item} onEdit={onEdit} onDelete={onDelete} onStatusChange={onStatusChange} />
   return null
 }
@@ -54,9 +55,10 @@ function CardShell({ children, accentColor = 'border-brand-200' }) {
   )
 }
 
-function CardActions({ onEdit, onDelete }) {
+function CardActions({ onEdit, onDelete, children }) {
   return (
     <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-surface-border min-w-0">
+      {children}
       <button onClick={onEdit} className="btn-secondary text-xs px-3 py-1.5">Edit</button>
       <button onClick={onDelete} className="btn-danger text-xs px-3 py-1.5">Delete</button>
     </div>
@@ -69,13 +71,18 @@ function ExamCard({ item, onEdit, onDelete }) {
       <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-start justify-between gap-2 min-w-0">
         <div className="min-w-0">
           <p className="font-medium text-ink leading-snug break-words">{item.course_name}</p>
-          {item.course_code && <p className="text-xs text-ink-muted mt-0.5">{item.course_code}</p>}
+          <div className="flex flex-wrap items-center gap-1.5 mt-0.5 min-w-0">
+            {item.course_code && <p className="text-xs text-ink-muted break-words">{item.course_code}</p>}
+          </div>
         </div>
-        {item.difficulty && (
-          <span className={`badge ${difficultyColor[item.difficulty]} capitalize flex-shrink-0 w-fit`}>
-            {item.difficulty}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0 min-w-0">
+          <ExamCountdown date={item.exam_date} time={item.exam_time} compact />
+          {item.difficulty && (
+            <span className={`badge ${difficultyColor[item.difficulty]} capitalize flex-shrink-0 w-fit`}>
+              {item.difficulty}
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 min-w-0">
         <p className="text-sm text-ink-muted min-w-0">
@@ -92,7 +99,7 @@ function ExamCard({ item, onEdit, onDelete }) {
   )
 }
 
-function InterviewCard({ item, onEdit, onDelete }) {
+function InterviewCard({ item, onEdit, onDelete, onReview }) {
   const typeColor = {
     onsite: 'bg-teal-50 text-teal-700',
     online: 'bg-blue-50 text-blue-700',
@@ -107,11 +114,14 @@ function InterviewCard({ item, onEdit, onDelete }) {
           <p className="font-medium text-ink leading-snug break-words">{item.company_name}</p>
           {item.position_title && <p className="text-xs text-ink-muted leading-snug break-words mt-0.5">{item.position_title}</p>}
         </div>
-        {item.interview_type && (
-          <span className={`badge ${typeColor[item.interview_type] || 'bg-slate-100 text-slate-600'} capitalize flex-shrink-0 w-fit`}>
-            {item.interview_type}
-          </span>
-        )}
+        <div className="flex flex-wrap items-center gap-1.5 flex-shrink-0 min-w-0">
+          <ExamCountdown date={item.interview_date} time={item.interview_time} compact tone="purple" />
+          {item.interview_type && (
+            <span className={`badge ${typeColor[item.interview_type] || 'bg-slate-100 text-slate-600'} capitalize flex-shrink-0 w-fit`}>
+              {item.interview_type}
+            </span>
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2 min-w-0">
         <p className="text-sm text-ink-muted min-w-0">
@@ -133,7 +143,13 @@ function InterviewCard({ item, onEdit, onDelete }) {
           </button>
         )}
       </div>
-      <CardActions onEdit={onEdit} onDelete={onDelete} />
+      <CardActions onEdit={onEdit} onDelete={onDelete}>
+        {onReview && (
+          <button onClick={onReview} className="btn-secondary text-xs px-3 py-1.5">
+            {item.review_decision || item.review_rating ? 'Review' : 'Add Review'}
+          </button>
+        )}
+      </CardActions>
     </CardShell>
   )
 }

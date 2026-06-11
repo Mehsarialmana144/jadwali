@@ -1,4 +1,4 @@
-export default function StatCard({ label, value, sub, color = 'brand', icon }) {
+export default function StatCard({ label, value, sub, color = 'brand', icon, extra }) {
   const colorMap = {
     brand:  { bg: 'bg-brand-50',  text: 'text-brand-700',  icon: 'text-brand-500'  },
     green:  { bg: 'bg-green-50',  text: 'text-green-700',  icon: 'text-green-500'  },
@@ -19,6 +19,7 @@ export default function StatCard({ label, value, sub, color = 'brand', icon }) {
         <p className="text-xs font-medium text-ink-muted uppercase tracking-wide">{label}</p>
         <p className={`text-lg min-[380px]:text-xl sm:text-2xl font-semibold leading-tight mt-0.5 ${c.text} break-words`}>{value}</p>
         {sub && <p className="text-xs text-ink-faint leading-snug mt-1 break-words">{sub}</p>}
+        {extra && <div className="mt-3">{extra}</div>}
       </div>
     </div>
   )

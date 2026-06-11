@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
-import { formatDate, formatTime, todayStr } from '../lib/dateUtils'
+import ExamCountdown from '../components/ExamCountdown'
+import { formatDate, formatTime, isFutureDateTime, todayStr } from '../lib/dateUtils'
 
 export default function Timeline() {
   const { session } = useAuth()
@@ -64,7 +65,7 @@ export default function Timeline() {
   }, [userId])
 
   const today = todayStr()
-  const visible = showPast ? items : items.filter(i => i.date >= today)
+  const visible = showPast ? items : items.filter(i => i.type === 'exam' ? isFutureDateTime(i.date, i.time) : i.date >= today)
 
   // Group by date
   const grouped = visible.reduce((acc, item) => {
@@ -166,6 +167,12 @@ export default function Timeline() {
                             </p>
                             <div className="flex gap-1 flex-shrink-0 flex-wrap min-w-0">
                               <span className={`badge ${meta.bg} ${meta.text}`}>{meta.label}</span>
+                              {item.type === 'exam' && (
+                                <ExamCountdown date={item.date} time={item.time} compact />
+                              )}
+                              {item.type === 'interview' && (
+                                <ExamCountdown date={item.date} time={item.time} compact tone="purple" />
+                              )}
                               {item.badge && (
                                 <span className={`badge ${badgeColors[item.badge] || 'bg-slate-100 text-slate-600'} capitalize`}>
                                   {badgeLabels[item.badge] || item.badge}

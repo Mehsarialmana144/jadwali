@@ -55,9 +55,33 @@ create table if not exists public.interviews (
   location_or_link   text,
   preparation_notes  text,
   notes              text,
+  review_rating      integer check (review_rating between 1 and 5),
+  review_role_type   text check (review_role_type in ('internship', 'coop', 'full_time', 'part_time')),
+  review_role_clarity text check (review_role_clarity in ('clear', 'somewhat_clear', 'not_clear')),
+  review_work_mode   text check (review_work_mode in ('onsite', 'online', 'hybrid', 'not_mentioned')),
+  review_reward      text check (review_reward in ('yes', 'no', 'not_mentioned')),
+  review_company_fit text check (review_company_fit in ('good', 'maybe', 'not_good')),
+  review_pros        text,
+  review_cons        text,
+  review_questions_asked text,
+  review_decision    text check (review_decision in ('interested', 'waiting', 'not_interested', 'need_more_info')),
+  review_follow_up_notes text,
   created_at         timestamptz default now(),
   updated_at         timestamptz default now()
 );
+
+-- Additive migration for existing Jadwali databases.
+alter table public.interviews add column if not exists review_rating integer check (review_rating between 1 and 5);
+alter table public.interviews add column if not exists review_role_type text check (review_role_type in ('internship', 'coop', 'full_time', 'part_time'));
+alter table public.interviews add column if not exists review_role_clarity text check (review_role_clarity in ('clear', 'somewhat_clear', 'not_clear'));
+alter table public.interviews add column if not exists review_work_mode text check (review_work_mode in ('onsite', 'online', 'hybrid', 'not_mentioned'));
+alter table public.interviews add column if not exists review_reward text check (review_reward in ('yes', 'no', 'not_mentioned'));
+alter table public.interviews add column if not exists review_company_fit text check (review_company_fit in ('good', 'maybe', 'not_good'));
+alter table public.interviews add column if not exists review_pros text;
+alter table public.interviews add column if not exists review_cons text;
+alter table public.interviews add column if not exists review_questions_asked text;
+alter table public.interviews add column if not exists review_decision text check (review_decision in ('interested', 'waiting', 'not_interested', 'need_more_info'));
+alter table public.interviews add column if not exists review_follow_up_notes text;
 
 
 -- ============================================================

@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
 import StatCard from '../components/StatCard'
-import { formatTime, todayStr } from '../lib/dateUtils'
+import ExamCountdown from '../components/ExamCountdown'
+import { formatTime, isFutureDateTime, todayStr } from '../lib/dateUtils'
 
 function dateTimeValue(date, time) {
   return `${date || ''}T${time || '00:00'}`
@@ -74,10 +75,10 @@ export default function Dashboard() {
   const today = todayStr()
   const currentMonth = new Date()
   const currentMonthKey = monthKey(currentMonth)
+  const upcomingExams = data.exams.filter(e => isFutureDateTime(e.exam_date, e.exam_time))
 
-  // Next exam (future or today)
-  const nextExam = data.exams
-    .filter(e => e.exam_date >= today)
+  // Next exam by exact date and time.
+  const nextExam = upcomingExams
     .sort((a, b) => dateTimeValue(a.exam_date, a.exam_time).localeCompare(dateTimeValue(b.exam_date, b.exam_time)))[0]
 
   // Next interview
@@ -95,7 +96,7 @@ export default function Dashboard() {
 
   // Upcoming items (next 5, combined)
   const upcoming = [
-    ...data.exams.filter(e => e.exam_date >= today).map(e => ({
+    ...upcomingExams.map(e => ({
       type: 'exam', date: e.exam_date, time: e.exam_time,
       title: e.course_name, sub: e.course_code, id: e.id,
     })),
@@ -162,14 +163,24 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 min-w-0 max-w-full">
         <StatCard
           label="Next Exam"
-          value={nextExam ? (nextExam.course_code || nextExam.course_name || 'Exam') : 'None'}
+          value={nextExam ? (
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span>{nextExam.course_code || nextExam.course_name || 'Exam'}</span>
+              <ExamCountdown date={nextExam.exam_date} time={nextExam.exam_time} compact />
+            </span>
+          ) : 'None'}
           sub={nextExam ? shortDateTime(nextExam.exam_date, nextExam.exam_time) : 'No upcoming exams'}
           color="brand"
           icon={<BookIcon />}
         />
         <StatCard
           label="Next Interview"
-          value={interviewMainValue(nextInterview)}
+          value={nextInterview ? (
+            <span className="flex flex-wrap items-center gap-1.5">
+              <span>{interviewMainValue(nextInterview)}</span>
+              <ExamCountdown date={nextInterview.interview_date} time={nextInterview.interview_time} compact tone="purple" />
+            </span>
+          ) : 'None'}
           sub={nextInterview ? shortDateTime(nextInterview.interview_date, nextInterview.interview_time) : 'No upcoming interviews'}
           color="purple"
           icon={<BriefcaseIcon />}
@@ -257,6 +268,9 @@ export default function Dashboard() {
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className={`badge ${typeBadge[item.type]} capitalize`}>{item.type}</span>
                         <p className="text-sm font-medium text-ink break-words">{itemLabel(item)}</p>
+                        {item.type === 'interview' && (
+                          <ExamCountdown date={item.date} time={item.time} compact tone="purple" />
+                        )}
                       </div>
                       {item.type === 'exam' && item.title && <p className="text-xs text-ink-faint mt-0.5 break-words">{item.title}</p>}
                       {item.type !== 'exam' && item.sub && <p className="text-xs text-ink-faint mt-0.5 break-words">{item.sub}</p>}
@@ -314,6 +328,12 @@ export default function Dashboard() {
                       {item.type}
                     </span>
                     <p className="text-sm font-medium text-ink leading-snug break-words">{item.title || item.sub || item.type}</p>
+                    {item.type === 'exam' && (
+                      <ExamCountdown date={item.date} time={item.time} compact />
+                    )}
+                    {item.type === 'interview' && (
+                      <ExamCountdown date={item.date} time={item.time} compact tone="purple" />
+                    )}
                   </div>
                   {item.sub && <p className="text-xs text-ink-faint leading-snug break-words mt-1 pl-0.5">{item.sub}</p>}
                 </div>

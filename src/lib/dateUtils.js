@@ -40,6 +40,61 @@ export function isFutureOrToday(dateStr) {
   return dateStr >= todayStr()
 }
 
+export function dateTimeFromParts(dateStr, timeStr) {
+  if (!dateStr) return null
+  const parsed = new Date(`${dateStr}T${timeStr || '00:00'}`)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+export function isFutureDateTime(dateStr, timeStr) {
+  const date = dateTimeFromParts(dateStr, timeStr)
+  return Boolean(date && date.getTime() > Date.now())
+}
+
+export function examCountdownParts(dateStr, timeStr) {
+  const date = dateTimeFromParts(dateStr, timeStr)
+  if (!date) return null
+
+  const diffMs = date.getTime() - Date.now()
+  if (diffMs <= 0) return null
+
+  const totalSeconds = Math.max(0, Math.floor(diffMs / 1000))
+  const days = Math.floor(totalSeconds / (24 * 60 * 60))
+  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60))
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
+  const seconds = totalSeconds % 60
+
+  return { days, hours, minutes, seconds }
+}
+
+export function examCountdownLabel(dateStr, timeStr) {
+  const date = dateTimeFromParts(dateStr, timeStr)
+  if (!date) return ''
+
+  const diffMs = date.getTime() - Date.now()
+  if (diffMs <= 0) return ''
+
+  const minuteMs = 60 * 1000
+  const hourMs = 60 * minuteMs
+  const dayMs = 24 * hourMs
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const startOfExamDay = new Date(date)
+  startOfExamDay.setHours(0, 0, 0, 0)
+  const dayDiff = Math.round((startOfExamDay - startOfToday) / dayMs)
+
+  if (dayDiff === 1) return 'Tomorrow'
+  if (dayDiff > 1) return `${dayDiff} days left`
+
+  const totalMinutes = Math.max(1, Math.ceil(diffMs / minuteMs))
+  if (totalMinutes < 60) return `${totalMinutes}m left`
+
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+  const timeLeft = minutes ? `${hours}h ${minutes}m left` : `${hours}h left`
+  return dayDiff === 0 ? `Today · ${timeLeft}` : timeLeft
+}
+
 /**
  * Returns a short relative label: "Today", "Tomorrow", or the formatted date.
  */
