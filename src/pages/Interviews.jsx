@@ -22,7 +22,7 @@ const REVIEW_EMPTY = {
   review_questions_asked: '',
   review_decision: '',
   review_follow_up_notes: '',
-}
+} 
 
 function decisionScore(item) {
   if (!item.review_rating) return 0

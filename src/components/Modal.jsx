@@ -13,7 +13,7 @@ export default function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 overflow-x-hidden">
       {/* Backdrop */}
-      <div
+       <div
         className="absolute inset-0 bg-black/30 backdrop-blur-sm"
         onClick={onClose}
       />

@@ -6,3 +6,4 @@ export default function ProtectedRoute({ session, children }) {
   }
   return children
 }
+ 

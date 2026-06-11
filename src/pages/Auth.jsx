@@ -18,7 +18,7 @@ export default function Auth() {
     setError('')
     setMessage('')
     setLoading(true)
-
+ 
     try {
       if (mode === 'signup') {
         if (!form.full_name.trim()) {

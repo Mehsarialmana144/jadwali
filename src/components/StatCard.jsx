@@ -22,5 +22,5 @@ export default function StatCard({ label, value, sub, color = 'brand', icon, ext
         {extra && <div className="mt-3">{extra}</div>}
       </div>
     </div>
-  )
+  ) 
 }

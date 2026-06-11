@@ -22,7 +22,7 @@ const COLUMN_LABELS = {
 function normalizeHeader(value) {
   return value.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]/g, '')
 }
-
+ 
 function headerToColumn(value) {
   const normalized = normalizeHeader(value)
   if (['coursecode', 'code', 'رمزالمقرر', 'كودالمقرر', 'رمز', 'المقرر'].includes(normalized)) return 'course_code'

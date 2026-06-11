@@ -12,7 +12,7 @@ const priorityColor = {
   medium: 'bg-amber-50 text-amber-700',
   high:   'bg-red-50 text-red-700',
 }
-
+ 
 const statusColor = {
   todo:        'bg-slate-100 text-slate-600',
   in_progress: 'bg-blue-50 text-blue-700',

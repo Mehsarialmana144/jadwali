@@ -10,7 +10,7 @@ const navItems = [
   { to: '/tasks',     label: 'Tasks',     icon: CheckIcon },
   { to: '/timeline',  label: 'Timeline',  icon: CalendarIcon },
 ]
-
+ 
 export default function Navbar() {
   const { session } = useAuth()
   const navigate = useNavigate()

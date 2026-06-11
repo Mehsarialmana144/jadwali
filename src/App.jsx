@@ -25,7 +25,7 @@ function AppLayout({ children }) {
       </main>
     </div>
   )
-}
+} 
 
 export default function App() {
   const [session, setSession] = useState(undefined) // undefined = loading

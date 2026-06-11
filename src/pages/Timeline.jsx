@@ -20,7 +20,7 @@ export default function Timeline() {
         supabase.from('interviews').select('id,company_name,position_title,interview_date,interview_time,interview_type').eq('user_id', userId),
         supabase.from('tasks').select('id,title,due_date,due_time,category,priority,status').eq('user_id', userId),
       ])
-
+ 
       const combined = [
         ...(exRes.data || []).map(e => ({
           id:    'exam-' + e.id,
