@@ -40,9 +40,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14 min-w-0 gap-2">
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0 p-2 -m-2">
-            <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold font-display">J</span>
-            </div>
+            <img src="/logo-mark.png" alt="Jadwali" width="32" height="32" className="w-8 h-8 rounded-lg ring-1 ring-black/10 flex-shrink-0" />
             <span className="font-display font-semibold text-ink text-lg hidden sm:block">Jadwali</span>
           </NavLink>
 

@@ -62,9 +62,7 @@ export default function Auth() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-600 rounded-2xl mb-3">
-            <span className="text-white text-xl font-bold font-display">J</span>
-          </div>
+          <img src="/logo-mark.png" alt="" width="80" height="80" className="block mx-auto w-20 h-20 rounded-2xl ring-1 ring-black/10 shadow-sm mb-3" />
           <h1 className="font-display text-2xl font-semibold text-ink">Jadwali</h1>
           <p className="text-sm text-ink-muted mt-1">Your personal work planner</p>
         </div>
