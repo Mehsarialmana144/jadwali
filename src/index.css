@@ -198,6 +198,26 @@
     background-size: 1rem;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a29e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   }
+  /* iOS renders date/time inputs with their own intrinsic width and centred text, so they
+     overflow their container. Reset the native look so they behave like the other fields. */
+  input[type='date'],
+  input[type='time'],
+  input[type='datetime-local'] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+  }
+  input[type='date']::-webkit-date-and-time-value,
+  input[type='time']::-webkit-date-and-time-value,
+  input[type='datetime-local']::-webkit-date-and-time-value {
+    text-align: left;
+    min-width: 0;
+    margin: 0;
+  }
   .btn-primary,
   .btn-secondary,
   .btn-ghost,
