@@ -40,7 +40,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-14 min-w-0 gap-2">
           {/* Logo */}
           <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0 p-2 -m-2">
-            <img src="/logo-mark.png" alt="Jadwali" width="32" height="32" className="w-8 h-8 rounded-lg ring-1 ring-black/10 flex-shrink-0" />
+            <img src="/logo-mark.png" alt="Jadwali" width="32" height="32" className="w-8 h-8 rounded-lg ring-1 ring-black/10 flex-shrink-0 dark:hidden" />
+            <img src="/logo-mark-dark.png" alt="Jadwali" width="32" height="32" className="hidden dark:block w-8 h-8 rounded-lg ring-1 ring-white/10 flex-shrink-0" />
             <span className="font-display font-semibold text-ink text-lg hidden sm:block">Jadwali</span>
           </NavLink>
 
