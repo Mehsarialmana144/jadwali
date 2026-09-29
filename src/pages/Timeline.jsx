@@ -1,8 +1,27 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
-import ExamCountdown from '../components/ExamCountdown'
-import { formatDate, formatTime, isFutureDateTime, todayStr } from '../lib/dateUtils'
+import CompanyBadge from '../components/CompanyBadge'
+import { formatDate, formatTime, todayStr, addDays } from '../lib/dateUtils'
+import { useRefetchOnFocus } from '../lib/useRefetchOnFocus'
+
+const priorityDot = {
+  low:    'bg-slate-400',
+  medium: 'bg-amber-500',
+  high:   'bg-red-500',
+}
+
+const statusColors = {
+  todo:        'bg-slate-500/10 text-slate-600 dark:text-slate-300',
+  in_progress: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  done:        'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+}
+
+const statusLabels = {
+  todo:        'To Do',
+  in_progress: 'In Progress',
+  done:        'Done',
+}
 
 export default function Timeline() {
   const { session } = useAuth()
@@ -10,194 +29,157 @@ export default function Timeline() {
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [showPast, setShowPast] = useState(false)
 
-  useEffect(() => {
-    async function load() {
-      setLoading(true)
-      const [exRes, intRes, taskRes] = await Promise.all([
-        supabase.from('exams').select('id,course_name,exam_date,exam_time,difficulty,location').eq('user_id', userId),
-        supabase.from('interviews').select('id,company_name,position_title,interview_date,interview_time,interview_type').eq('user_id', userId),
-        supabase.from('tasks').select('id,title,due_date,due_time,category,priority,status').eq('user_id', userId),
-      ])
- 
-      const combined = [
-        ...(exRes.data || []).map(e => ({
-          id:    'exam-' + e.id,
-          type:  'exam',
-          title: e.course_name,
-          sub:   e.location || '',
-          badge: e.difficulty || '',
-          date:  e.exam_date,
-          time:  e.exam_time,
-        })),
-        ...(intRes.data || []).map(i => ({
-          id:    'int-' + i.id,
-          type:  'interview',
-          title: i.company_name,
-          sub:   i.position_title || '',
-          badge: i.interview_type || '',
-          date:  i.interview_date,
-          time:  i.interview_time,
-        })),
-        ...(taskRes.data || []).filter(t => t.due_date).map(t => ({
-          id:    'task-' + t.id,
-          type:  'task',
-          title: t.title,
-          sub:   t.category || '',
-          badge: t.status || '',
-          date:  t.due_date,
-          time:  t.due_time,
-          done:  t.status === 'done',
-        })),
-      ]
-        .filter(item => item.date)
-        .sort((a, b) => {
-          const da = a.date + 'T' + (a.time || '00:00')
-          const db = b.date + 'T' + (b.time || '00:00')
-          return da.localeCompare(db)
-        })
+  async function load() {
+    setLoadError('')
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('id,title,due_date,due_time,priority,status,companies(name,logo_url,accent_color)')
+      .eq('user_id', userId)
 
-      setItems(combined)
+    if (error) {
+      setLoadError(error.message)
+      setItems([])
       setLoading(false)
+      return
     }
-    load()
-  }, [userId])
+
+    const combined = (data || [])
+      .filter(t => t.due_date)
+      .map(t => ({
+        id:       t.id,
+        title:    t.title,
+        company:  t.companies,
+        priority: t.priority || '',
+        status:   t.status || 'todo',
+        date:     t.due_date,
+        time:     t.due_time,
+        done:     t.status === 'done',
+      }))
+      .sort((a, b) => {
+        const da = a.date + 'T' + (a.time || '00:00')
+        const db = b.date + 'T' + (b.time || '00:00')
+        return da.localeCompare(db)
+      })
+
+    setItems(combined)
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [userId])
+  useRefetchOnFocus(load)
 
   const today = todayStr()
-  const visible = showPast ? items : items.filter(i => i.type === 'exam' ? isFutureDateTime(i.date, i.time) : i.date >= today)
+  const tomorrow = addDays(today, 1)
 
-  // Group by date
-  const grouped = visible.reduce((acc, item) => {
-    const key = item.date
-    if (!acc[key]) acc[key] = []
-    acc[key].push(item)
+  const past = items.filter(i => i.date < today)
+  const future = items.filter(i => i.date >= today)
+
+  const grouped = future.reduce((acc, item) => {
+    (acc[item.date] = acc[item.date] || []).push(item)
     return acc
   }, {})
-
   const dates = Object.keys(grouped).sort()
 
-  const typeMeta = {
-    exam:      { label: 'Exam',      bg: 'bg-brand-50',   text: 'text-brand-700',  dot: 'bg-brand-500'   },
-    interview: { label: 'Interview', bg: 'bg-purple-50',  text: 'text-purple-700', dot: 'bg-purple-500'  },
-    task:      { label: 'Task',      bg: 'bg-amber-50',   text: 'text-amber-700',  dot: 'bg-amber-500'   },
-  }
+  const pastGrouped = past.reduce((acc, item) => {
+    (acc[item.date] = acc[item.date] || []).push(item)
+    return acc
+  }, {})
+  const pastDates = Object.keys(pastGrouped).sort()
 
-  const badgeColors = {
-    easy: 'bg-green-50 text-green-700',
-    medium: 'bg-amber-50 text-amber-700',
-    hard: 'bg-red-50 text-red-700',
-    onsite: 'bg-teal-50 text-teal-700',
-    online: 'bg-blue-50 text-blue-700',
-    phone: 'bg-purple-50 text-purple-700',
-    todo: 'bg-slate-100 text-slate-600',
-    in_progress: 'bg-blue-50 text-blue-700',
-    done: 'bg-green-50 text-green-700',
-  }
-
-  const badgeLabels = {
-    in_progress: 'In Progress',
+  function dateLabel(date) {
+    if (date === today) return 'Today'
+    if (date === tomorrow) return 'Tomorrow'
+    return formatDate(date)
   }
 
   if (loading) return (
-    <div className="flex justify-center py-24">
-      <div className="w-6 h-6 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+    <div className="flex justify-center py-20">
+      <div className="w-5 h-5 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   return (
     <div className="min-w-0 max-w-full overflow-x-hidden">
-      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-6 min-w-0">
+      <div className="flex flex-col min-[380px]:flex-row min-[380px]:items-center justify-between gap-3 mb-5 min-w-0">
         <div className="min-w-0">
           <h1 className="page-title">Timeline</h1>
-          <p className="text-sm text-ink-muted mt-0.5">All your events in one view</p>
+          <p className="text-xs text-ink-muted mt-0.5">Your agenda, day by day</p>
+          {loadError && (
+            <p className="text-sm text-red-600 dark:text-red-400 bg-red-500/10 px-3 py-2 rounded-lg mt-2">
+              Couldn't load tasks: {loadError}
+            </p>
+          )}
         </div>
-        <button
-          onClick={() => setShowPast(p => !p)}
-          className="btn-secondary text-sm w-full min-[380px]:w-auto"
-        >
-          {showPast ? 'Hide Past' : 'Show Past'}
-        </button>
+        {pastDates.length > 0 && (
+          <button onClick={() => setShowPast(p => !p)} className="btn-secondary text-xs w-full min-[380px]:w-auto">
+            {showPast ? 'Hide past' : `Show past (${past.length})`}
+          </button>
+        )}
       </div>
 
-      {dates.length === 0 ? (
-        <div className="card p-10 text-center">
-          <p className="text-ink-muted">{showPast ? 'Nothing here yet.' : 'No upcoming events.'}</p>
-          <p className="text-sm text-ink-faint mt-1">Add exams, interviews, or tasks to see them here.</p>
+      {dates.length === 0 && !showPast ? (
+        <div className="card empty-state">
+          <p className="text-sm text-ink-muted">No upcoming tasks.</p>
         </div>
       ) : (
-        <div className="space-y-8 min-w-0">
-          {dates.map(date => {
-            const isToday = date === today
-            const isPast = date < today
+        <div className="relative">
+          {showPast && pastDates.length > 0 && (
+            <div className="relative pl-6 mb-6 opacity-70">
+              <div className="absolute left-[7px] top-2 bottom-0 w-px bg-surface-border" />
+              {pastDates.map(date => (
+                <AgendaDay key={date} label={formatDate(date)} isToday={false} items={pastGrouped[date]} />
+              ))}
+            </div>
+          )}
 
-            return (
-              <div key={date}>
-                {/* Date header */}
-                <div className="flex items-center gap-3 mb-3 min-w-0">
-                  <div className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    isToday ? 'bg-brand-600 text-white' :
-                    isPast  ? 'bg-slate-100 text-slate-500' :
-                              'bg-surface border border-surface-border text-ink'
-                  }`}>
-                    {isToday ? 'Today' : formatDate(date)}
-                  </div>
-                  <div className="flex-1 h-px bg-surface-border min-w-0" />
-                </div>
-
-                {/* Items for this date */}
-                <div className="space-y-2 pl-0 sm:pl-2 min-w-0">
-                  {grouped[date].map(item => {
-                    const meta = typeMeta[item.type]
-                    return (
-                      <div
-                        key={item.id}
-                        className={`flex items-start gap-3 p-3 sm:p-3.5 rounded-xl border border-surface-border bg-white min-w-0 ${item.done ? 'opacity-60' : ''}`}
-                      >
-                        {/* Dot */}
-                        <div className="mt-1.5 flex-shrink-0">
-                          <div className={`w-2.5 h-2.5 rounded-full ${meta.dot}`} />
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col min-[420px]:flex-row min-[420px]:items-start justify-between gap-2 min-w-0">
-                            <p className={`font-medium text-sm min-w-0 break-words ${item.done ? 'line-through text-ink-faint' : 'text-ink'}`}>
-                              {item.title}
-                            </p>
-                            <div className="flex gap-1 flex-shrink-0 flex-wrap min-w-0">
-                              <span className={`badge ${meta.bg} ${meta.text}`}>{meta.label}</span>
-                              {item.type === 'exam' && (
-                                <ExamCountdown date={item.date} time={item.time} compact />
-                              )}
-                              {item.type === 'interview' && (
-                                <ExamCountdown date={item.date} time={item.time} compact tone="purple" />
-                              )}
-                              {item.badge && (
-                                <span className={`badge ${badgeColors[item.badge] || 'bg-slate-100 text-slate-600'} capitalize`}>
-                                  {badgeLabels[item.badge] || item.badge}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 min-w-0">
-                            {item.time && (
-                              <span className="text-xs text-ink-muted font-medium">{formatTime(item.time)}</span>
-                            )}
-                            {item.sub && (
-                              <span className="text-xs sm:text-sm text-ink-muted leading-snug break-words">{item.sub}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
+          {dates.length > 0 && (
+            <div className="relative pl-6">
+              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-surface-border" />
+              {dates.map(date => (
+                <AgendaDay key={date} label={dateLabel(date)} isToday={date === today} items={grouped[date]} />
+              ))}
+            </div>
+          )}
         </div>
       )}
+    </div>
+  )
+}
+
+function AgendaDay({ label, isToday, items }) {
+  return (
+    <div className="relative mb-6 last:mb-0">
+      <div
+        className={`absolute -left-6 top-1 w-3.5 h-3.5 rounded-full border-2 ${
+          isToday ? 'bg-brand-600 border-brand-600' : 'bg-surface-card border-surface-border'
+        }`}
+      />
+      <div className="flex items-center gap-2 mb-2">
+        <p className={`text-sm font-semibold ${isToday ? 'text-brand-600 dark:text-brand-400' : 'text-ink'}`}>{label}</p>
+        <span className="text-xs text-ink-faint">{items.length}</span>
+      </div>
+      <div className="space-y-1.5">
+        {items.map(item => <AgendaCard key={item.id} item={item} />)}
+      </div>
+    </div>
+  )
+}
+
+function AgendaCard({ item }) {
+  return (
+    <div className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border border-surface-border bg-surface-card min-w-0 ${item.done ? 'opacity-50' : ''}`}>
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${priorityDot[item.priority] || 'bg-slate-400'}`} />
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium truncate ${item.done ? 'line-through text-ink-faint' : 'text-ink'}`}>{item.title}</p>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-xs text-ink-muted min-w-0">
+          {item.time && <span>{formatTime(item.time)}</span>}
+          {item.company?.name && <CompanyBadge company={item.company} />}
+        </div>
+      </div>
+      <span className={`badge flex-shrink-0 ${statusColors[item.status] || statusColors.todo}`}>{statusLabels[item.status] || item.status}</span>
     </div>
   )
 }

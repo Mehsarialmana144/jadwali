@@ -55,8 +55,8 @@ export default function Auth() {
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-100 rounded-full opacity-40 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-100 rounded-full opacity-40 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-500/10 rounded-full opacity-60 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/10 rounded-full opacity-60 blur-3xl" />
       </div>
 
       <div className="relative w-full max-w-sm">
@@ -66,22 +66,18 @@ export default function Auth() {
             <span className="text-white text-xl font-bold font-display">J</span>
           </div>
           <h1 className="font-display text-2xl font-semibold text-ink">Jadwali</h1>
-          <p className="text-sm text-ink-muted mt-1">Your academic planner</p>
+          <p className="text-sm text-ink-muted mt-1">Your personal work planner</p>
         </div>
 
         {/* Card */}
         <div className="card p-6">
           {/* Tabs */}
-          <div className="flex gap-1 mb-6 bg-surface p-1 rounded-lg">
+          <div className="filter-bar mb-6">
             {['signin', 'signup'].map(m => (
               <button
                 key={m}
                 onClick={() => { setMode(m); setError(''); setMessage('') }}
-                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                  mode === m
-                    ? 'bg-white text-ink shadow-sm'
-                    : 'text-ink-muted hover:text-ink'
-                }`}
+                className={`chip flex-1 py-1.5 ${mode === m ? 'chip-active' : 'chip-inactive'}`}
               >
                 {m === 'signin' ? 'Sign In' : 'Sign Up'}
               </button>
@@ -132,13 +128,13 @@ export default function Auth() {
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg">
+              <div className="bg-red-500/10 text-red-600 dark:text-red-400 text-sm px-3 py-2 rounded-lg">
                 {error}
               </div>
             )}
 
             {message && (
-              <div className="bg-green-50 text-green-700 text-sm px-3 py-2 rounded-lg">
+              <div className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-sm px-3 py-2 rounded-lg">
                 {message}
               </div>
             )}
@@ -160,7 +156,7 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-xs text-ink-faint mt-6">
-          جدولي — Organize your academic life
+          جدولي — Organize your work life
         </p>
       </div>
     </div>

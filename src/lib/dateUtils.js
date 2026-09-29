@@ -19,80 +19,39 @@ export function formatTime(timeStr) {
 }
 
 /**
- * Returns today's date as YYYY-MM-DD string.
+ * Formats a Date object as a YYYY-MM-DD string using its LOCAL
+ * calendar date (never via toISOString/UTC, which shifts the day
+ * for any timezone ahead of UTC).
+ */
+function toDateStr(d) {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+/**
+ * Returns today's date as YYYY-MM-DD string, in the local timezone.
  */
 export function todayStr() {
-  return new Date().toISOString().split('T')[0]
+  return toDateStr(new Date())
 }
 
 /**
- * Returns true if dateStr is today.
+ * Returns dateStr shifted by `days` (may be negative), as YYYY-MM-DD.
  */
-export function isToday(dateStr) {
-  return dateStr === todayStr()
+export function addDays(dateStr, days) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  d.setDate(d.getDate() + days)
+  return toDateStr(d)
 }
 
 /**
- * Returns true if dateStr is in the future or today.
+ * Returns the Sunday (start of week) on or before dateStr, as YYYY-MM-DD.
  */
-export function isFutureOrToday(dateStr) {
-  if (!dateStr) return false
-  return dateStr >= todayStr()
-}
-
-export function dateTimeFromParts(dateStr, timeStr) {
-  if (!dateStr) return null
-  const parsed = new Date(`${dateStr}T${timeStr || '00:00'}`)
-  return Number.isNaN(parsed.getTime()) ? null : parsed
-}
-
-export function isFutureDateTime(dateStr, timeStr) {
-  const date = dateTimeFromParts(dateStr, timeStr)
-  return Boolean(date && date.getTime() > Date.now())
-}
-
-export function examCountdownParts(dateStr, timeStr) {
-  const date = dateTimeFromParts(dateStr, timeStr)
-  if (!date) return null
-
-  const diffMs = date.getTime() - Date.now()
-  if (diffMs <= 0) return null
-
-  const totalSeconds = Math.max(0, Math.floor(diffMs / 1000))
-  const days = Math.floor(totalSeconds / (24 * 60 * 60))
-  const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60))
-  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60)
-  const seconds = totalSeconds % 60
-
-  return { days, hours, minutes, seconds }
-}
-
-export function examCountdownLabel(dateStr, timeStr) {
-  const date = dateTimeFromParts(dateStr, timeStr)
-  if (!date) return ''
-
-  const diffMs = date.getTime() - Date.now()
-  if (diffMs <= 0) return ''
-
-  const minuteMs = 60 * 1000
-  const hourMs = 60 * minuteMs
-  const dayMs = 24 * hourMs
-  const startOfToday = new Date()
-  startOfToday.setHours(0, 0, 0, 0)
-  const startOfExamDay = new Date(date)
-  startOfExamDay.setHours(0, 0, 0, 0)
-  const dayDiff = Math.round((startOfExamDay - startOfToday) / dayMs)
-
-  if (dayDiff === 1) return 'Tomorrow'
-  if (dayDiff > 1) return `${dayDiff} days left`
-
-  const totalMinutes = Math.max(1, Math.ceil(diffMs / minuteMs))
-  if (totalMinutes < 60) return `${totalMinutes}m left`
-
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  const timeLeft = minutes ? `${hours}h ${minutes}m left` : `${hours}h left`
-  return dayDiff === 0 ? `Today · ${timeLeft}` : timeLeft
+export function startOfWeek(dateStr) {
+  const d = new Date(`${dateStr}T00:00:00`)
+  return addDays(dateStr, -d.getDay())
 }
 
 /**
@@ -101,22 +60,9 @@ export function examCountdownLabel(dateStr, timeStr) {
 export function relativeDate(dateStr) {
   if (!dateStr) return '—'
   const today = todayStr()
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const tomorrowStr = tomorrow.toISOString().split('T')[0]
+  const tomorrowStr = addDays(today, 1)
 
   if (dateStr === today) return 'Today'
   if (dateStr === tomorrowStr) return 'Tomorrow'
   return formatDate(dateStr)
-}
-
-/**
- * Sort items by date then time ascending.
- */
-export function sortByDateTime(items, dateKey, timeKey) {
-  return [...items].sort((a, b) => {
-    const da = (a[dateKey] || '') + 'T' + (a[timeKey] || '00:00')
-    const db = (b[dateKey] || '') + 'T' + (b[timeKey] || '00:00')
-    return da.localeCompare(db)
-  })
 }

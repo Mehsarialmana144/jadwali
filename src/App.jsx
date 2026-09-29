@@ -3,12 +3,12 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { supabase } from './lib/supabaseClient'
 import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
-import Exams from './pages/Exams'
-import Interviews from './pages/Interviews'
+import Profile from './pages/Profile'
 import Tasks from './pages/Tasks'
 import Timeline from './pages/Timeline'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
+import { syncTimezone } from './lib/push'
 
 export const AuthContext = createContext(null)
 
@@ -17,6 +17,12 @@ export function useAuth() {
 }
 
 function AppLayout({ children }) {
+  const { session } = useAuth()
+  const userId = session.user.id
+
+  // Keep the user's timezone up to date so reminders fire at the right local time.
+  useEffect(() => { syncTimezone(userId) }, [userId])
+
   return (
     <div className="app-frame min-h-screen bg-surface">
       <Navbar />
@@ -71,18 +77,10 @@ export default function App() {
             }
           />
           <Route
-            path="/exams"
+            path="/profile"
             element={
               <ProtectedRoute session={session}>
-                <AppLayout><Exams /></AppLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/interviews"
-            element={
-              <ProtectedRoute session={session}>
-                <AppLayout><Interviews /></AppLayout>
+                <AppLayout><Profile /></AppLayout>
               </ProtectedRoute>
             }
           />

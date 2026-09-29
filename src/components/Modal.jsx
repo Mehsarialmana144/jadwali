@@ -19,13 +19,13 @@ export default function Modal({ title, onClose, children }) {
       />
 
       {/* Panel */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-1.5rem)] sm:w-full max-w-lg max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
+      <div className="relative bg-surface-card rounded-2xl shadow-md w-[calc(100vw-1.5rem)] sm:w-full max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden min-w-0">
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-surface-border sticky top-0 bg-white rounded-t-2xl z-10 min-w-0">
-          <h2 className="font-display font-semibold text-ink min-w-0 break-words">{title}</h2>
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b border-surface-border sticky top-0 bg-surface-card rounded-t-2xl z-10 min-w-0">
+          <h2 className="font-display font-semibold text-ink text-[15px] min-w-0 break-words">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface text-ink-muted transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-raised text-ink-muted transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -34,7 +34,7 @@ export default function Modal({ title, onClose, children }) {
         </div>
 
         {/* Body */}
-        <div className="px-4 sm:px-5 py-5 min-w-0">
+        <div className="px-4 sm:px-5 py-4 min-w-0">
           {children}
         </div>
       </div>

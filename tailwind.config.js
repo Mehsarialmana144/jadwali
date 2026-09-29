@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -25,15 +26,21 @@ export default {
           950: '#1e1d50',
         },
         surface: {
-          DEFAULT: '#fafaf9',
-          card:    '#ffffff',
-          border:  '#e8e5e0',
+          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
+          card:    'rgb(var(--surface-card) / <alpha-value>)',
+          raised:  'rgb(var(--surface-raised) / <alpha-value>)',
+          border:  'rgb(var(--surface-border) / <alpha-value>)',
         },
         ink: {
-          DEFAULT: '#1c1917',
-          muted:   '#78716c',
-          faint:   '#a8a29e',
+          DEFAULT: 'rgb(var(--ink) / <alpha-value>)',
+          muted:   'rgb(var(--ink-muted) / <alpha-value>)',
+          faint:   'rgb(var(--ink-faint) / <alpha-value>)',
         },
+      },
+      boxShadow: {
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
       },
     },
   },
