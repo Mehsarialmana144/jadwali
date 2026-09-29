@@ -25,7 +25,7 @@ export default function Modal({ title, onClose, children }) {
           <h2 className="font-display font-semibold text-ink text-[15px] min-w-0 break-words">{title}</h2>
           <button
             onClick={onClose}
-            className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-surface-raised text-ink-muted transition-colors"
+            className="w-10 h-10 -mr-2 sm:w-7 sm:h-7 sm:mr-0 flex items-center justify-center rounded-lg hover:bg-surface-raised text-ink-muted transition-colors" aria-label="Close"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

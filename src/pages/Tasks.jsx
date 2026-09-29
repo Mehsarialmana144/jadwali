@@ -478,8 +478,8 @@ function KanbanCard({ task, onEdit, onDelete }) {
           <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${priorityDot[task.priority] || 'bg-slate-400'}`} />
           <p className="text-sm font-medium text-ink break-words min-w-0">{task.title}</p>
         </div>
-        <button onClick={onEdit} className="p-1 rounded hover:bg-surface-raised text-ink-faint hover:text-ink flex-shrink-0" aria-label="Edit task">
-          <EditIcon className="w-3.5 h-3.5" />
+        <button onClick={onEdit} className="p-3 -m-2 sm:p-1 sm:m-0 rounded hover:bg-surface-raised text-ink-faint hover:text-ink flex-shrink-0" aria-label="Edit task">
+          <EditIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
         </button>
       </div>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5 text-xs min-w-0">
@@ -490,7 +490,7 @@ function KanbanCard({ task, onEdit, onDelete }) {
         )}
         {task.companies?.name && <CompanyBadge company={task.companies} className="text-ink-muted" />}
       </div>
-      <button onClick={onDelete} className="text-[11px] text-ink-faint hover:text-red-600 dark:hover:text-red-400 mt-1.5">
+      <button onClick={onDelete} className="text-xs sm:text-[11px] text-ink-faint hover:text-red-600 dark:hover:text-red-400 mt-0.5 sm:mt-1.5 py-2.5 sm:py-0 -mb-2 sm:mb-0 pr-6 sm:pr-0">
         Delete
       </button>
     </div>

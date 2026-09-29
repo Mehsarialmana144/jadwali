@@ -18,11 +18,11 @@ export default function TaskRow({ task, onToggleDone, onStatusChange, onEdit, on
   const isOverdue = task.due_date && !done && task.due_date < todayStr()
 
   return (
-    <div className="flex items-start gap-2.5 px-2.5 sm:px-3 py-2.5 rounded-lg hover:bg-surface-raised transition-colors min-w-0">
+    <div className="flex items-start gap-2.5 px-2.5 sm:px-3 py-2.5 hover:bg-surface-raised transition-colors min-w-0">
       <button
         type="button"
         onClick={() => onToggleDone(task)}
-        className={`mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+        className={`relative before:absolute before:-inset-3.5 before:content-[''] mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
           done ? 'bg-brand-600 border-brand-600' : 'border-surface-border hover:border-brand-400'
         }`}
         aria-label={done ? 'Mark as not done' : 'Mark as done'}
@@ -51,7 +51,7 @@ export default function TaskRow({ task, onToggleDone, onStatusChange, onEdit, on
         </div>
       </div>
 
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center flex-shrink-0 -my-1.5">
         <select
           value={task.status || 'todo'}
           onChange={e => onStatusChange(task.id, e.target.value)}
@@ -62,13 +62,13 @@ export default function TaskRow({ task, onToggleDone, onStatusChange, onEdit, on
           <option value="done">Done</option>
         </select>
         {onEdit && (
-          <button onClick={() => onEdit(task)} className="p-1.5 rounded-md hover:bg-surface-border text-ink-faint hover:text-ink transition-colors" aria-label="Edit task">
-            <EditIcon className="w-3.5 h-3.5" />
+          <button onClick={() => onEdit(task)} className="p-3 sm:p-1.5 rounded-md hover:bg-surface-border text-ink-faint hover:text-ink transition-colors" aria-label="Edit task">
+            <EditIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
         )}
         {onDelete && (
-          <button onClick={() => onDelete(task.id)} className="p-1.5 rounded-md hover:bg-red-500/10 text-ink-faint hover:text-red-600 dark:hover:text-red-400 transition-colors" aria-label="Delete task">
-            <TrashIcon className="w-3.5 h-3.5" />
+          <button onClick={() => onDelete(task.id)} className="p-3 sm:p-1.5 rounded-md hover:bg-red-500/10 text-ink-faint hover:text-red-600 dark:hover:text-red-400 transition-colors" aria-label="Delete task">
+            <TrashIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
           </button>
         )}
       </div>

@@ -217,7 +217,7 @@ export default function Dashboard() {
           <div className="card overflow-hidden">
             <div className="px-3.5 sm:px-4 py-3 border-b border-surface-border flex items-center justify-between gap-3 min-w-0">
               <h2 className="font-semibold text-sm text-ink">Upcoming</h2>
-              <Link to="/timeline" className="text-xs text-brand-600 dark:text-brand-400 hover:underline font-medium whitespace-nowrap">
+              <Link to="/timeline" className="text-xs text-brand-600 dark:text-brand-400 hover:underline font-medium whitespace-nowrap py-3 -my-3 pl-3 -ml-3">
                 View timeline →
               </Link>
             </div>
@@ -240,18 +240,18 @@ export default function Dashboard() {
           <section className="card overflow-hidden lg:sticky lg:top-[4.5rem]">
             <div className="px-3.5 py-2.5 border-b border-surface-border min-w-0">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <div className="flex items-center gap-1">
-                  <button onClick={goPrev} className="p-1 rounded hover:bg-surface-raised text-ink-muted" aria-label="Previous">
-                    <ChevronLeftIcon className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-1 sm:gap-1">
+                  <button onClick={goPrev} className="p-3 -m-2 sm:p-1 sm:m-0 rounded hover:bg-surface-raised text-ink-muted" aria-label="Previous">
+                    <ChevronLeftIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </button>
                   <h2 className="font-semibold text-xs text-ink whitespace-nowrap px-0.5">
                     {calendarView === 'month' ? monthTitle : weekTitle}
                   </h2>
-                  <button onClick={goNext} className="p-1 rounded hover:bg-surface-raised text-ink-muted" aria-label="Next">
-                    <ChevronRightIcon className="w-3.5 h-3.5" />
+                  <button onClick={goNext} className="p-3 -m-2 sm:p-1 sm:m-0 rounded hover:bg-surface-raised text-ink-muted" aria-label="Next">
+                    <ChevronRightIcon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                   </button>
                 </div>
-                <button onClick={goToday} className="text-[11px] font-medium text-brand-600 dark:text-brand-400 hover:underline flex-shrink-0">
+                <button onClick={goToday} className="text-xs sm:text-[11px] font-medium text-brand-600 dark:text-brand-400 hover:underline flex-shrink-0 py-3 -my-3 pl-3 -ml-3">
                   Today
                 </button>
               </div>
@@ -262,7 +262,7 @@ export default function Dashboard() {
             </div>
 
             <div className="p-2.5">
-              <div className="grid grid-cols-7 gap-0.5 text-center text-[8px] font-medium text-ink-faint mb-1">
+              <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-medium text-ink-faint mb-1">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
                   <span key={i} className="truncate">{day}</span>
                 ))}
@@ -283,7 +283,7 @@ export default function Dashboard() {
                       key={date}
                       type="button"
                       onClick={() => setSelectedDate(date)}
-                      className={`w-full aspect-square rounded text-[9px] font-medium flex flex-col items-center justify-center gap-px transition-colors min-w-0 ${
+                      className={`w-full aspect-square rounded text-xs font-medium flex flex-col items-center justify-center gap-px transition-colors min-w-0 ${
                         isSelected
                           ? 'bg-brand-600 text-white'
                           : isToday

@@ -35,11 +35,11 @@ export default function Navbar() {
   const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
 
   return (
-    <header className="w-full max-w-full bg-surface-card/95 backdrop-blur border-b border-surface-border sticky top-0 z-30">
+    <header className="w-full max-w-full bg-surface-card border-b border-surface-border sticky top-0 z-30">
       <div className="app-container">
         <div className="flex items-center justify-between h-14 min-w-0 gap-2">
           {/* Logo */}
-          <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0">
+          <NavLink to="/dashboard" className="flex items-center gap-2 min-w-0 p-2 -m-2">
             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-xs font-bold font-display">J</span>
             </div>
@@ -70,7 +70,7 @@ export default function Navbar() {
           <div className="relative flex-shrink-0">
             <button
               onClick={() => setMenuOpen(o => !o)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-raised transition-colors max-w-full"
+              className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-surface-raised transition-colors max-w-full"
             >
               <div className="w-7 h-7 rounded-full bg-brand-600/10 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xs font-semibold">
                 {initials}

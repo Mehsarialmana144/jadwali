@@ -204,7 +204,7 @@ function ToggleRow({ label, hint, checked, onChange, children }) {
           aria-checked={checked}
           aria-label={label}
           onClick={() => onChange(!checked)}
-          className={`relative w-9 h-5 rounded-full flex-shrink-0 transition-colors mt-0.5 ${checked ? 'bg-brand-600' : 'bg-surface-border'}`}
+          className={`relative before:absolute before:-inset-3 before:content-[''] w-9 h-5 rounded-full flex-shrink-0 transition-colors mt-0.5 ${checked ? 'bg-brand-600' : 'bg-surface-border'}`}
         >
           <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
         </button>
