@@ -65,10 +65,10 @@ export default function Auth() {
       <div className="relative w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <img src="/logo-mark.png" alt="" width="80" height="80" className="block dark:hidden mx-auto w-20 h-20 rounded-2xl ring-1 ring-black/10 shadow-sm mb-3" />
-          <img src="/logo-mark-dark.png" alt="" width="80" height="80" className="hidden dark:block mx-auto w-20 h-20 rounded-2xl ring-1 ring-white/10 mb-3" />
-          <h1 className="font-display text-2xl font-semibold text-ink">Jadwali</h1>
-          <p className="text-sm text-ink-muted mt-1">Your personal work planner</p>
+          <h1 className="sr-only">Jadwali</h1>
+          <img src="/logo-full.png" alt="Jadwali جدولي" height="176" className="block dark:hidden mx-auto h-44 w-auto" />
+          <img src="/logo-full-dark.png" alt="Jadwali جدولي" height="176" className="hidden dark:block mx-auto h-44 w-auto" />
+          <p className="text-sm text-ink-muted mt-2">Your personal work planner</p>
         </div>
 
         {/* Card */}
