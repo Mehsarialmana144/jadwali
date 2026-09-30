@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase, getStayPreference, setStayPreference } from '../lib/supabaseClient'
 
 export default function Auth() {
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
@@ -7,6 +7,7 @@ export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const [stay, setStay] = useState(getStayPreference)
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -18,6 +19,7 @@ export default function Auth() {
     setError('')
     setMessage('')
     setLoading(true)
+    setStayPreference(stay) // must be set before the session is created so it lands in the right storage
  
     try {
       if (mode === 'signup') {
@@ -137,6 +139,16 @@ export default function Auth() {
                 {message}
               </div>
             )}
+
+            <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer select-none min-h-[44px] -my-2">
+              <input
+                type="checkbox"
+                checked={stay}
+                onChange={e => setStay(e.target.checked)}
+                className="w-5 h-5 rounded accent-brand-600 flex-shrink-0"
+              />
+              Stay signed in
+            </label>
 
             <button type="submit" disabled={loading} className="btn-primary w-full mt-1">
               {loading ? (

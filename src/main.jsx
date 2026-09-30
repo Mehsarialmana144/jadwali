@@ -14,3 +14,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
  
 window.addEventListener('load', () => { registerServiceWorker() })
+window.addEventListener('load', () => { navigator.storage?.persist?.().catch(() => {}) })
