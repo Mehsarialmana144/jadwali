@@ -8,6 +8,7 @@ import {
   summaryLocalDateIfDue,
   type Notification,
   type Settings,
+  type SummaryTask,
   type Task,
 } from './logic.ts'
 
@@ -17,7 +18,8 @@ export type Deps = {
   listSubscriptions(): Promise<Subscription[]>
   listSettings(userIds: string[]): Promise<Settings[]>
   listTasks(userIds: string[], dateFrom: string, dateTo: string): Promise<Task[]>
-  countSummary(userId: string, localToday: string): Promise<{ dueToday: number; overdue: number }>
+  /** Tasks due on `localToday` that are not done. */
+  todaysTasks(userId: string, localToday: string): Promise<SummaryTask[]>
   summarySent(userId: string, localDate: string): Promise<boolean>
   /** Inserts log rows; returns ONLY the rows that were newly inserted (unique key prevents duplicates). */
   insertLog(rows: Notification[]): Promise<Notification[]>
@@ -71,8 +73,8 @@ export async function runTick(deps: Deps, nowMs: number): Promise<TickResult> {
   for (const settings of settingsByUser.values()) {
     const date = summaryLocalDateIfDue(nowMs, settings)
     if (!date || (await deps.summarySent(settings.user_id, date))) continue
-    const { dueToday, overdue } = await deps.countSummary(settings.user_id, localParts(nowMs, settings.timezone).date)
-    const n = buildSummaryNotification(settings.user_id, date, dueToday, overdue)
+    const todays = await deps.todaysTasks(settings.user_id, localParts(nowMs, settings.timezone).date)
+    const n = buildSummaryNotification(settings.user_id, date, todays)
     if (n) candidates.push(n)
   }
 

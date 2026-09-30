@@ -1,7 +1,7 @@
 // Run with: node supabase/functions/send-notifications/test.ts   (Node 22.18+/24+ strips types natively)
 import assert from 'node:assert/strict'
 import {
-  buildTaskNotifications, buildSummaryNotification, localParts, summaryLocalDateIfDue, zonedTimeToUtcMs,
+  buildTaskNotifications, buildSummaryNotification, localParts, summaryLocalDateIfDue, zonedTimeToUtcMs, type SummaryTask,
   type Notification, type Settings, type Task,
 } from './logic.ts'
 import { runTick, type Deps, type Subscription } from './notify.ts'
@@ -116,16 +116,41 @@ await test('due only inside the window after the chosen local time', () => {
   assert.equal(summaryLocalDateIfDue(at('2026-09-29T09:00:00Z'), s), null) // 12:00 local, past grace
   assert.equal(summaryLocalDateIfDue(at('2026-09-29T05:01:00Z'), settings()), null) // disabled
 })
-await test('message text, and nothing when there is nothing to report', () => {
-  assert.equal(buildSummaryNotification('u1', '2026-09-29', 2, 1)!.payload.body, '2 due today · 1 overdue')
-  assert.equal(buildSummaryNotification('u1', '2026-09-29', 0, 3)!.payload.body, '3 overdue')
-  assert.equal(buildSummaryNotification('u1', '2026-09-29', 0, 0), null)
+const st = (title: string, due_time: string | null = null, priority: string | null = 'medium'): SummaryTask => ({ title, due_time, priority })
+await test('title is "Good morning, are you ready?" and body lists today\'s tasks', () => {
+  const n = buildSummaryNotification('u1', '2026-09-29', [st('Send invoice'), st('Book dentist'), st('Plan trip')])!
+  assert.equal(n.payload.title, 'Good morning, are you ready?')
+  assert.equal(n.payload.body, 'Book dentist, Plan trip, Send invoice') // same priority: alphabetical
+  assert.equal(n.payload.url, '/dashboard')
+  assert.equal(n.kind, 'daily_summary')
+  assert.equal(n.dedupe_key, '2026-09-29')
+})
+await test('summary order: timed tasks by time first, then priority (high first)', () => {
+  const n = buildSummaryNotification('u1', 'd', [st('Low untimed', null, 'low'), st('High untimed', null, 'high'), st('Afternoon', '14:00:00'), st('Morning', '09:00:00')])!
+  assert.equal(n.payload.body, 'Morning, Afternoon, High untimed, Low untimed')
+})
+await test('summary is silent when nothing is due today', () => {
+  assert.equal(buildSummaryNotification('u1', 'd', []), null)
+})
+await test('summary caps a long list with "+N more"', () => {
+  const many = Array.from({ length: 12 }, (_, i) => st(`Task ${String(i + 1).padStart(2, '0')}`, `${String(8 + i).padStart(2, '0')}:00:00`))
+  const n = buildSummaryNotification('u1', 'd', many)!
+  assert.equal(n.payload.body, 'Task 01, Task 02, Task 03, Task 04, Task 05, Task 06, Task 07, Task 08, +4 more')
+})
+await test('summary cuts off by length and shortens very long titles', () => {
+  const long = Array.from({ length: 6 }, (_, i) => st('A fairly long task title number ' + (i + 1) + ' for testing', `${String(8 + i).padStart(2, '0')}:00:00`))
+  const n = buildSummaryNotification('u1', 'd', long)!
+  assert.ok(n.payload.body.length <= 200, String(n.payload.body.length))
+  assert.match(n.payload.body, /\+\d+ more$/)
+  const one = buildSummaryNotification('u1', 'd', [st('x'.repeat(200))])!
+  assert.ok(one.payload.body.length <= 60 && one.payload.body.endsWith('…'))
 })
 
 console.log('full tick (fake database + fake push service)')
 function fake(opts: { subs?: Subscription[]; settings?: Settings[]; tasks?: Task[]; sendImpl?: (s: Subscription) => void } = {}) {
   const log = new Set<string>()
   const sent: Array<{ sub: string; title: string }> = []
+  const sentBodies: string[] = []
   const deleted: string[] = []
   const subs = opts.subs ?? [{ id: 's1', user_id: 'u1', endpoint: 'https://push/1', p256dh: 'k', auth: 'a' }]
   const key = (n: Notification) => `${n.user_id}|${n.kind}|${n.dedupe_key}`
@@ -133,7 +158,7 @@ function fake(opts: { subs?: Subscription[]; settings?: Settings[]; tasks?: Task
     listSubscriptions: async () => subs.filter(s => !deleted.includes(s.id)),
     listSettings: async () => opts.settings ?? [{ ...quiet(), daily_summary_enabled: true, daily_summary_time: '13:00:00' }],
     listTasks: async () => opts.tasks ?? [task({ reminder: '30m' })],
-    countSummary: async () => ({ dueToday: 1, overdue: 0 }),
+    todaysTasks: async () => [{ title: 'Send invoice', due_time: '09:00:00', priority: 'high' }, { title: 'Book dentist', due_time: null, priority: 'medium' }],
     summarySent: async (u, d) => log.has(`${u}|daily_summary|${d}`),
     insertLog: async rows => {
       const fresh = rows.filter(r => !log.has(key(r)))
@@ -145,9 +170,10 @@ function fake(opts: { subs?: Subscription[]; settings?: Settings[]; tasks?: Task
     send: async (sub, payload) => {
       opts.sendImpl?.(sub)
       sent.push({ sub: sub.id, title: payload.title })
+      sentBodies.push(payload.body)
     },
   }
-  return { deps, sent, deleted, log }
+  return { deps, sent, sentBodies, deleted, log }
 }
 
 await test('sends a due reminder and the daily summary once', async () => {
@@ -155,7 +181,8 @@ await test('sends a due reminder and the daily summary once', async () => {
   const now = at('2026-09-29T10:31:00Z') // 13:31 Riyadh; summary set for 13:00 local
   const r = await runTick(f.deps, now)
   assert.equal(r.sent, 2)
-  assert.deepEqual(f.sent.map(s => s.title).sort(), ['Reminder: Send invoice', 'Your day in Jadwali'].sort())
+  assert.deepEqual(f.sent.map(s => s.title).sort(), ['Good morning, are you ready?', 'Reminder: Send invoice'].sort())
+  assert.equal(f.sentBodies.find(b => b.includes('Send invoice, Book dentist')), 'Send invoice, Book dentist')
 })
 await test('NO duplicates: the same minute or the next minute sends nothing new', async () => {
   const f = fake()

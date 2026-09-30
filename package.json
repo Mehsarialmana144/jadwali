@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:function": "node scripts/build-edge-function.mjs",
+    "test:function": "node supabase/functions/send-notifications/test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",

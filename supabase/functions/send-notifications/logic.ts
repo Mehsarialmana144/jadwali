@@ -222,16 +222,48 @@ export function summaryLocalDateIfDue(nowMs: number, settings: Settings): string
   return nowMs >= triggerMs && nowMs < triggerMs + GRACE_MS ? date : null
 }
 
-export function buildSummaryNotification(userId: string, localDate: string, dueToday: number, overdue: number): Notification | null {
-  if (dueToday === 0 && overdue === 0) return null
-  const parts: string[] = []
-  if (dueToday > 0) parts.push(`${dueToday} due today`)
-  if (overdue > 0) parts.push(`${overdue} overdue`)
+export type SummaryTask = { title: string; due_time: string | null; priority: string | null }
+
+const SUMMARY_MAX_TITLES = 8
+const SUMMARY_MAX_CHARS = 170 // lock screens show only a few lines
+const PRIORITY_RANK: Record<string, number> = { high: 0, medium: 1, low: 2 }
+
+function clip(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max - 1).trimEnd() + '…' : text
+}
+
+/** Today's tasks in the order you'd do them: timed ones by time first, then by priority. */
+export function sortSummaryTasks(tasks: SummaryTask[]): SummaryTask[] {
+  return [...tasks].sort((a, b) => {
+    if (!!a.due_time !== !!b.due_time) return a.due_time ? -1 : 1
+    if (a.due_time && b.due_time && a.due_time !== b.due_time) return a.due_time < b.due_time ? -1 : 1
+    const pa = PRIORITY_RANK[a.priority || ''] ?? 1
+    const pb = PRIORITY_RANK[b.priority || ''] ?? 1
+    return pa !== pb ? pa - pb : a.title.localeCompare(b.title)
+  })
+}
+
+/** "Good morning, are you ready?" + today's task titles ("task1, task2, +N more"). Null when nothing is due. */
+export function buildSummaryNotification(userId: string, localDate: string, todaysTasks: SummaryTask[]): Notification | null {
+  if (todaysTasks.length === 0) return null
+  const titles = sortSummaryTasks(todaysTasks).map(t => clip(t.title.trim(), 60))
+  const shown: string[] = []
+  for (const t of titles) {
+    const next = [...shown, t].join(', ')
+    if (shown.length > 0 && (shown.length >= SUMMARY_MAX_TITLES || next.length > SUMMARY_MAX_CHARS)) break
+    shown.push(t)
+  }
+  const more = titles.length - shown.length
   return {
     user_id: userId,
     task_id: null,
     kind: 'daily_summary',
     dedupe_key: localDate,
-    payload: { title: 'Your day in Jadwali', body: parts.join(' · '), url: '/dashboard', tag: 'daily-summary' },
+    payload: {
+      title: 'Good morning, are you ready?',
+      body: shown.join(', ') + (more > 0 ? `, +${more} more` : ''),
+      url: '/dashboard',
+      tag: 'daily-summary',
+    },
   }
 }

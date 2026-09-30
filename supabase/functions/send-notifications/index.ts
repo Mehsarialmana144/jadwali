@@ -5,7 +5,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { runTick, sendTest, type Deps, type Subscription } from './notify.ts'
-import type { Notification, Settings, Task } from './logic.ts'
+import type { Notification, Settings, SummaryTask, Task } from './logic.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,12 +62,15 @@ const deps: Deps = {
     if (error) throw error
     return data as unknown as Task[]
   },
-  async countSummary(userId, localToday) {
-    const base = () => admin.from('tasks').select('id', { count: 'exact', head: true }).eq('user_id', userId).neq('status', 'done')
-    const [due, over] = await Promise.all([base().eq('due_date', localToday), base().lt('due_date', localToday)])
-    if (due.error) throw due.error
-    if (over.error) throw over.error
-    return { dueToday: due.count ?? 0, overdue: over.count ?? 0 }
+  async todaysTasks(userId, localToday) {
+    const { data, error } = await admin
+      .from('tasks')
+      .select('title,due_time,priority')
+      .eq('user_id', userId)
+      .neq('status', 'done')
+      .eq('due_date', localToday)
+    if (error) throw error
+    return data as SummaryTask[]
   },
   async summarySent(userId, localDate) {
     const { count, error } = await admin
