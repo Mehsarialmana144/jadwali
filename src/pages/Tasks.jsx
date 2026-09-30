@@ -167,11 +167,6 @@ export default function Tasks() {
     }
   }
 
-  async function handleToggleDone(task) {
-    const next = task.status === 'done' ? 'todo' : 'done'
-    await handleStatusChange(task.id, next)
-  }
-
   const today = todayStr()
   const weekEnd = addDays(today, 6)
 
@@ -328,7 +323,6 @@ export default function Tasks() {
                     <TaskRow
                       key={task.id}
                       task={task}
-                      onToggleDone={handleToggleDone}
                       onStatusChange={handleStatusChange}
                       onEdit={openEdit}
                       onDelete={handleDelete}

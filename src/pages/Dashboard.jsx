@@ -79,11 +79,6 @@ export default function Dashboard() {
     }
   }
 
-  async function handleToggleDone(task) {
-    const next = task.status === 'done' ? 'todo' : 'done'
-    await handleStatusChange(task.id, next)
-  }
-
   const currentMonthKey = monthAnchor
 
   const scopedTasks = tasks.filter(t => {
@@ -207,7 +202,7 @@ export default function Dashboard() {
             ) : (
               <div className="divide-y divide-surface-border">
                 {todaysFocus.map(task => (
-                  <TaskRow key={task.id} task={task} onToggleDone={handleToggleDone} onStatusChange={handleStatusChange} />
+                  <TaskRow key={task.id} task={task} onStatusChange={handleStatusChange} />
                 ))}
               </div>
             )}
@@ -228,7 +223,7 @@ export default function Dashboard() {
             ) : (
               <div className="divide-y divide-surface-border">
                 {upcoming.map(task => (
-                  <TaskRow key={task.id} task={task} onToggleDone={handleToggleDone} onStatusChange={handleStatusChange} />
+                  <TaskRow key={task.id} task={task} onStatusChange={handleStatusChange} />
                 ))}
               </div>
             )}
