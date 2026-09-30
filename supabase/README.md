@@ -47,6 +47,18 @@ Push works only for the app added to the Home Screen (iOS/iPadOS 16.4+): Safari 
 - Editing a task's date, time or reminder creates a new dedupe key, so it will notify again for the new schedule.
 - Signing out removes this device's subscription (shared-device privacy), so re-enable after signing back in.
 
-## Daily summary
+## Notification types (three, independent, all optional)
 
-Title "Good morning, are you ready?"; body is today's open tasks (due today, not done) separated by commas: timed tasks first by time, then by priority, cut off with "+N more" when long. Nothing is sent when nothing is due today. Tapping it opens the Dashboard.
+| Type | Where you set it | What it sends |
+|---|---|---|
+| **Daily summary** | Profile: on/off + time | "Good morning, are you ready?" + today's open tasks (comma separated, timed first, "+N more" when long). Silent when nothing is due. Once per day. |
+| **Reminder before a task** | Add/Edit Task: switch + how long (5 min, 10, 15, 30, 1 hour, 2 hours, 1 day) | "Reminder: <task>" with "In 15 min · today at 2:00 PM" at that moment. |
+| **Notify at task time** | Add/Edit Task: switch | "Now: <task>" exactly at the task's date/time (to the minute). |
+
+Rules: a task with a date but no time counts as 09:00; done tasks never notify; a moment that had already passed when the task was last saved is skipped (the form warns you); rescheduling or changing the lead time notifies again for the new moment; duplicates are blocked by `notification_log`. There is no Due Soon or Overdue notification any more.
+
+Data model: `tasks.remind_before_minutes` (null = off), `tasks.notify_at_time` (boolean), `notification_settings.daily_summary_enabled/daily_summary_time`.
+
+## Migrating an existing database to these types
+
+Run `migrations-manual/2026-09-notification-types.sql`: STEP A first (adds the new columns, keeps the old ones), then deploy the new function and the new app, then STEP D (removes the old columns and the Due Soon / Overdue log kinds). Running it in that order keeps the live app working throughout.

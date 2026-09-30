@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../App'
+import Switch from './Switch'
 import { browserTimezone, disablePush, enablePush, getPushStatus, isIOS, sendTestNotification, syncTimezone } from '../lib/push'
 
 const DEFAULTS = {
-  due_soon_enabled: true,
-  overdue_enabled: true,
   daily_summary_enabled: false,
   daily_summary_time: '08:00',
 }
@@ -51,8 +50,6 @@ export default function NotificationSettings() {
       {
         user_id: userId,
         timezone: browserTimezone(),
-        due_soon_enabled: next.due_soon_enabled,
-        overdue_enabled: next.overdue_enabled,
         daily_summary_enabled: next.daily_summary_enabled,
         daily_summary_time: next.daily_summary_time || '08:00',
       },
@@ -106,20 +103,8 @@ export default function NotificationSettings() {
 
         <div className="divide-y divide-surface-border border-t border-surface-border min-w-0">
           <ToggleRow
-            label="Due soon"
-            hint="About 1 hour before a task is due."
-            checked={settings.due_soon_enabled}
-            onChange={v => update({ due_soon_enabled: v })}
-          />
-          <ToggleRow
-            label="Overdue"
-            hint="When a task passes its due time. Tasks with only a date are flagged at 9:00 AM the next day."
-            checked={settings.overdue_enabled}
-            onChange={v => update({ overdue_enabled: v })}
-          />
-          <ToggleRow
             label="Daily summary"
-            hint="One notification with what is due today and overdue."
+            hint="A morning notification listing what you have today."
             checked={settings.daily_summary_enabled}
             onChange={v => update({ daily_summary_enabled: v })}
           >
@@ -136,7 +121,7 @@ export default function NotificationSettings() {
         </div>
 
         <p className="text-[11px] text-ink-faint">
-          Reminders per task are set when you add or edit a task. Timezone: {browserTimezone()} (detected automatically).
+          Reminders before a task, and notifications at task time, are set on each task (Add or Edit Task). Timezone: {browserTimezone()} (detected automatically).
           Tasks with a date but no time are treated as 9:00 AM.
         </p>
       </div>
@@ -198,16 +183,7 @@ function ToggleRow({ label, hint, checked, onChange, children }) {
           <p className="text-sm font-medium text-ink">{label}</p>
           <p className="text-xs text-ink-muted mt-0.5">{hint}</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={checked}
-          aria-label={label}
-          onClick={() => onChange(!checked)}
-          className={`relative before:absolute before:-inset-3 before:content-[''] w-9 h-5 rounded-full flex-shrink-0 transition-colors mt-0.5 ${checked ? 'bg-brand-600' : 'bg-surface-border'}`}
-        >
-          <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${checked ? 'translate-x-4' : ''}`} />
-        </button>
+        <Switch label={label} checked={checked} onChange={onChange} />
       </div>
       {children}
     </div>

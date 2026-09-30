@@ -54,9 +54,10 @@ const deps: Deps = {
   async listTasks(userIds, dateFrom, dateTo) {
     const { data, error } = await admin
       .from('tasks')
-      .select('id,user_id,title,due_date,due_time,status,reminder,companies(name)')
+      .select('id,user_id,title,due_date,due_time,status,remind_before_minutes,notify_at_time,updated_at,companies(name)')
       .in('user_id', userIds)
       .neq('status', 'done')
+      .or('remind_before_minutes.not.is.null,notify_at_time.eq.true')
       .gte('due_date', dateFrom)
       .lte('due_date', dateTo)
     if (error) throw error

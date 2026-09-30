@@ -7,20 +7,20 @@ export type Task = {
   due_date: string | null // YYYY-MM-DD
   due_time: string | null // HH:MM[:SS]
   status: string
-  reminder: string | null
+  remind_before_minutes: number | null // null = "remind me before" is off
+  notify_at_time: boolean | null // "notify me at task time"
+  updated_at: string | null // when the task was last saved
   companies?: { name: string } | null
 }
 
 export type Settings = {
   user_id: string
   timezone: string
-  due_soon_enabled: boolean
-  overdue_enabled: boolean
   daily_summary_enabled: boolean
   daily_summary_time: string // HH:MM[:SS]
 }
 
-export type Kind = 'reminder' | 'due_soon' | 'overdue' | 'daily_summary'
+export type Kind = 'reminder' | 'at_time' | 'daily_summary'
 
 export type Notification = {
   user_id: string
@@ -31,19 +31,9 @@ export type Notification = {
 }
 
 export const DEFAULT_DUE_TIME = '09:00'
-export const DUE_SOON_MINUTES = 60
 // A trigger is only sent if it fired within this window. This keeps a delayed
-// cron run from sending stale alerts, and stops a flood of old overdue tasks
-// the moment someone enables notifications.
+// cron run from sending stale alerts.
 export const GRACE_MS = 3 * 60 * 60 * 1000
-
-export const REMINDER_MINUTES: Record<string, number> = {
-  at_time: 0,
-  '15m': 15,
-  '30m': 30,
-  '1h': 60,
-  '1d': 1440,
-}
 
 function safeTimeZone(tz: string): string {
   try {
@@ -129,9 +119,20 @@ function suffix(task: Task): string {
   return task.companies?.name ? ` · ${task.companies.name}` : ''
 }
 
+/** "15 min", "1 hour", "2 hours", "1 day" */
+export function formatLead(minutes: number): string {
+  if (minutes % 1440 === 0) return minutes === 1440 ? '1 day' : `${minutes / 1440} days`
+  if (minutes % 60 === 0) return minutes === 60 ? '1 hour' : `${minutes / 60} hours`
+  return `${minutes} min`
+}
+
 /**
- * Decides which task notifications (reminder / due soon / overdue) should be
- * sent right now. Returns candidates only; the caller de-duplicates via the log.
+ * Decides which per-task notifications should be sent right now:
+ *  - "reminder": `remind_before_minutes` before the task's date/time (null = off)
+ *  - "at_time":  exactly at the task's date/time (`notify_at_time`)
+ * The two are independent. A task with a date but no time counts as 09:00. A notification is skipped
+ * if its moment had already passed when the task was last saved (no late "reminders" for the past).
+ * Returns candidates only; the caller de-duplicates via the log.
  */
 export function buildTaskNotifications(nowMs: number, tasks: Task[], settingsByUser: Map<string, Settings>): Notification[] {
   const out: Notification[] = []
@@ -141,72 +142,45 @@ export function buildTaskNotifications(nowMs: number, tasks: Task[], settingsByU
     if (!settings || !task.due_date || task.status === 'done') continue
 
     const tz = settings.timezone
-    const timed = !!task.due_time
     const dueTime = hhmm(task.due_time || DEFAULT_DUE_TIME)
     const dueMs = zonedTimeToUtcMs(task.due_date, dueTime, tz)
+    const savedMs = task.updated_at ? Date.parse(task.updated_at) : 0
     const today = localParts(nowMs, tz).date
     const baseKey = `${task.id}|${task.due_date}|${task.due_time || ''}`
     const url = '/tasks'
-    const inWindow = (triggerMs: number) => nowMs >= triggerMs && nowMs < triggerMs + GRACE_MS
+    const isDue = (triggerMs: number) => nowMs >= triggerMs && nowMs < triggerMs + GRACE_MS && triggerMs >= savedMs
 
-    // Reminder
-    const reminder = task.reminder || 'none'
-    const offsetMin = REMINDER_MINUTES[reminder]
-    if (offsetMin !== undefined && inWindow(dueMs - offsetMin * 60_000)) {
-      const when = `${relativeDay(task.due_date, today)} at ${formatTime12(dueTime)}`
+    // 1) Reminder before the task
+    const lead = task.remind_before_minutes
+    if (lead && lead > 0 && isDue(dueMs - lead * 60_000)) {
       out.push({
         user_id: task.user_id,
         task_id: task.id,
         kind: 'reminder',
-        dedupe_key: `${baseKey}|${reminder}`,
+        dedupe_key: `${baseKey}|before|${lead}`,
         payload: {
           title: `Reminder: ${task.title}`,
-          body: `${offsetMin === 0 ? 'Due now' : `Due ${when}`}${suffix(task)}`,
+          body: `In ${formatLead(lead)} · ${relativeDay(task.due_date, today)} at ${formatTime12(dueTime)}${suffix(task)}`,
           url,
           tag: `${task.id}-reminder`,
         },
       })
     }
 
-    // Due soon (skipped when the task's own reminder already fires at the same moment)
-    if (
-      settings.due_soon_enabled &&
-      offsetMin !== DUE_SOON_MINUTES &&
-      nowMs < dueMs &&
-      inWindow(dueMs - DUE_SOON_MINUTES * 60_000)
-    ) {
-      const mins = Math.max(1, Math.round((dueMs - nowMs) / 60_000))
+    // 2) Notify at the task's time
+    if (task.notify_at_time && isDue(dueMs)) {
       out.push({
         user_id: task.user_id,
         task_id: task.id,
-        kind: 'due_soon',
-        dedupe_key: baseKey,
+        kind: 'at_time',
+        dedupe_key: `${baseKey}|at`,
         payload: {
-          title: `Due soon: ${task.title}`,
-          body: `Due in ${mins} min (${formatTime12(dueTime)})${suffix(task)}`,
+          title: `Now: ${task.title}`,
+          body: `Scheduled for ${formatTime12(dueTime)}${suffix(task)}`,
           url,
-          tag: `${task.id}-due-soon`,
+          tag: `${task.id}-at-time`,
         },
       })
-    }
-
-    // Overdue: at the due time for timed tasks; 09:00 the next day for date-only tasks
-    if (settings.overdue_enabled) {
-      const overdueMs = timed ? dueMs : zonedTimeToUtcMs(addDays(task.due_date, 1), DEFAULT_DUE_TIME, tz)
-      if (inWindow(overdueMs)) {
-        out.push({
-          user_id: task.user_id,
-          task_id: task.id,
-          kind: 'overdue',
-          dedupe_key: baseKey,
-          payload: {
-            title: `Overdue: ${task.title}`,
-            body: `Was due ${formatDateShort(task.due_date)}${timed ? ` at ${formatTime12(dueTime)}` : ''}${suffix(task)}`,
-            url,
-            tag: `${task.id}-overdue`,
-          },
-        })
-      }
     }
   }
 

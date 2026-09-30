@@ -263,12 +263,27 @@ create policy "company-logos: delete own"
 -- supabase-notifications-cron.sql.
 -- ============================================================
 
--- Per-task reminder: how long before the due moment to notify.
--- Tasks with a date but no time are treated as due at 09:00 local time.
-alter table public.tasks add column if not exists reminder text not null default 'none';
-alter table public.tasks drop constraint if exists tasks_reminder_check;
-alter table public.tasks add constraint tasks_reminder_check
-  check (reminder in ('none', 'at_time', '15m', '30m', '1h', '1d'));
+-- Per-task notifications (independent, both optional). Tasks with a date but no time count as 09:00 local time.
+--   remind_before_minutes : how long before the task to be reminded (null = off)
+--   notify_at_time        : notify exactly at the task's date/time
+alter table public.tasks add column if not exists remind_before_minutes integer;
+alter table public.tasks add column if not exists notify_at_time boolean not null default false;
+alter table public.tasks drop constraint if exists tasks_remind_before_check;
+alter table public.tasks add constraint tasks_remind_before_check
+  check (remind_before_minutes is null or remind_before_minutes between 1 and 10080);
+
+-- Upgrade from the old single "reminder" field (and drop it)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'tasks' and column_name = 'reminder') then
+    update public.tasks set notify_at_time = true where reminder = 'at_time' and notify_at_time = false;
+    update public.tasks
+       set remind_before_minutes = case reminder when '15m' then 15 when '30m' then 30 when '1h' then 60 when '1d' then 1440 end
+     where reminder in ('15m', '30m', '1h', '1d') and remind_before_minutes is null;
+    alter table public.tasks drop constraint if exists tasks_reminder_check;
+    alter table public.tasks drop column reminder;
+  end if;
+end $$;
 
 -- One row per browser/device that enabled push.
 create table if not exists public.push_subscriptions (
@@ -287,8 +302,6 @@ create index if not exists push_subscriptions_user_id_idx on public.push_subscri
 create table if not exists public.notification_settings (
   user_id               uuid primary key references auth.users(id) on delete cascade,
   timezone              text not null default 'UTC',
-  due_soon_enabled      boolean not null default true,   -- ~1 hour before due
-  overdue_enabled       boolean not null default true,
   daily_summary_enabled boolean not null default false,
   daily_summary_time    time not null default '08:00',   -- in the user's timezone
   created_at            timestamptz default now(),
@@ -301,12 +314,20 @@ create table if not exists public.notification_log (
   id         bigint generated always as identity primary key,
   user_id    uuid not null references auth.users(id) on delete cascade,
   task_id    uuid references public.tasks(id) on delete cascade,
-  kind       text not null check (kind in ('reminder', 'due_soon', 'overdue', 'daily_summary')),
+  kind       text not null,
   dedupe_key text not null,
   sent_at    timestamptz default now(),
   unique (user_id, kind, dedupe_key)
 );
 create index if not exists notification_log_sent_at_idx on public.notification_log (sent_at);
+
+-- Due Soon and Overdue no longer exist
+alter table public.notification_settings drop column if exists due_soon_enabled;
+alter table public.notification_settings drop column if exists overdue_enabled;
+delete from public.notification_log where kind in ('due_soon', 'overdue');
+alter table public.notification_log drop constraint if exists notification_log_kind_check;
+alter table public.notification_log add constraint notification_log_kind_check
+  check (kind in ('reminder', 'at_time', 'daily_summary'));
 
 -- Server-side secrets (e.g. the shared secret the scheduler uses to call the Edge Function).
 -- RLS enabled with NO policies: only the service role / postgres can read it.

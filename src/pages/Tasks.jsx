@@ -5,22 +5,24 @@ import { useAuth } from '../App'
 import TaskRow from '../components/TaskRow'
 import CompanyBadge from '../components/CompanyBadge'
 import Modal from '../components/Modal'
+import Switch from '../components/Switch'
 import { todayStr, addDays, relativeDate, formatTime } from '../lib/dateUtils'
 import { useRefetchOnFocus } from '../lib/useRefetchOnFocus'
 
 const EMPTY = {
   title: '', due_date: '', due_time: '', category: '', priority: 'medium',
-  status: 'todo', notes: '', company_id: '', reminder: 'none',
+  status: 'todo', notes: '', company_id: '',
+  remind_before: false, remind_minutes: '15', notify_at_time: false,
 }
 
-const REMINDER_OPTIONS = [
-  ['none', 'None'],
-  ['at_time', 'At time of task'],
-  ['15m', '15 minutes before'],
-  ['30m', '30 minutes before'],
-  ['1h', '1 hour before'],
-  ['1d', '1 day before'],
+// How long before a task the "remind me before" notification is sent
+const REMIND_LEADS = [
+  [5, '5 minutes'], [10, '10 minutes'], [15, '15 minutes'], [30, '30 minutes'],
+  [60, '1 hour'], [120, '2 hours'], [1440, '1 day'],
 ]
+
+// Tasks with a date but no time count as 09:00 (same rule as the server)
+const notifyMoment = (date, time) => new Date(`${date}T${(time || '09:00').slice(0, 5)}:00`).getTime()
 
 const VIEW_STORAGE_KEY = 'jadwali-tasks-view'
 
@@ -105,7 +107,9 @@ export default function Tasks() {
       status:     task.status     || 'todo',
       notes:      task.notes      || '',
       company_id: task.company_id || '',
-      reminder:   task.reminder   || 'none',
+      remind_before:  task.remind_before_minutes != null,
+      remind_minutes: String(task.remind_before_minutes ?? 15),
+      notify_at_time: !!task.notify_at_time,
     })
     setEditId(task.id)
     setError('')
@@ -130,7 +134,8 @@ export default function Tasks() {
       status:     form.status   || 'todo',
       notes:      form.notes.trim() || null,
       company_id: form.company_id || null,
-      reminder:   form.due_date ? (form.reminder || 'none') : 'none',
+      remind_before_minutes: form.due_date && form.remind_before ? Number(form.remind_minutes) : null,
+      notify_at_time:        !!(form.due_date && form.notify_at_time),
     }
 
     const save = body => (modal === 'add'
@@ -138,10 +143,10 @@ export default function Tasks() {
       : supabase.from('tasks').update(body).eq('id', editId).eq('user_id', userId))
 
     let { error: err } = await save(payload)
-    if (err && /reminder/i.test(err.message) && payload.reminder === 'none') {
-      // Database not migrated yet (tasks.reminder missing): still let the task save.
-      const { reminder, ...withoutReminder } = payload
-      ;({ error: err } = await save(withoutReminder))
+    if (err && /remind_before_minutes|notify_at_time/.test(err.message) && payload.remind_before_minutes === null && !payload.notify_at_time) {
+      // Database not migrated yet (new columns missing): still let the task save.
+      const { remind_before_minutes, notify_at_time, ...withoutNotify } = payload
+      ;({ error: err } = await save(withoutNotify))
     }
 
     if (err) { setError(err.message); setSaving(false); return }
@@ -422,17 +427,7 @@ export default function Tasks() {
                   <option value="done">Done</option>
                 </select>
               </div>
-              <div className="sm:col-span-2">
-                <label className="label">Reminder</label>
-                <select name="reminder" className="input" value={form.due_date ? form.reminder : 'none'} onChange={handleChange} disabled={!form.due_date}>
-                  {REMINDER_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                </select>
-                <p className="text-[11px] text-ink-faint mt-1">
-                  {form.due_date
-                    ? (form.due_time ? 'Sent as a push notification.' : 'No due time set, so reminders count from 9:00 AM.')
-                    : 'Set a due date to enable reminders.'}
-                </p>
-              </div>
+              <NotificationsBlock form={form} setForm={setForm} handleChange={handleChange} />
               <div className="sm:col-span-2">
                 <label className="label">Notes</label>
                 <textarea name="notes" className="input resize-none" rows={2} placeholder="Any notes…" value={form.notes} onChange={handleChange} />
@@ -509,5 +504,56 @@ function EditIcon({ className }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
     </svg>
+  )
+}
+
+function NotificationsBlock({ form, setForm, handleChange }) {
+  const hasDate = !!form.due_date
+  const dueMs = hasDate ? notifyMoment(form.due_date, form.due_time) : null
+  const minutes = Number(form.remind_minutes)
+  const leads = REMIND_LEADS.some(([m]) => m === minutes) ? REMIND_LEADS : [...REMIND_LEADS, [minutes, `${minutes} minutes`]]
+  const beforeOn = hasDate && form.remind_before
+  const atOn = hasDate && form.notify_at_time
+  // a notification whose moment is already in the past when you save is skipped by the server
+  const beforePassed = beforeOn && dueMs - minutes * 60_000 <= Date.now()
+  const atPassed = atOn && dueMs <= Date.now()
+  const warn = 'text-[11px] text-amber-700 dark:text-amber-400 mt-1'
+
+  return (
+    <div className="sm:col-span-2 rounded-xl border border-surface-border p-3 space-y-3">
+      <p className="label !mb-0">Notifications</p>
+
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-ink">Remind me before</p>
+          <Switch label="Remind me before" checked={beforeOn} disabled={!hasDate} onChange={v => setForm(f => ({ ...f, remind_before: v }))} />
+        </div>
+        {beforeOn && (
+          <div className="mt-2">
+            <label className="label" htmlFor="remind_minutes">How long before</label>
+            <select id="remind_minutes" name="remind_minutes" className="input" value={form.remind_minutes} onChange={handleChange}>
+              {leads.map(([m, label]) => <option key={m} value={m}>{label}</option>)}
+            </select>
+            {beforePassed && <p className={warn}>That moment has already passed, so no reminder will be sent.</p>}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-ink">Notify me at task time</p>
+          <Switch label="Notify me at task time" checked={atOn} disabled={!hasDate} onChange={v => setForm(f => ({ ...f, notify_at_time: v }))} />
+        </div>
+        {atPassed && <p className={warn}>That time has already passed, so no notification will be sent.</p>}
+      </div>
+
+      <p className="text-[11px] text-ink-faint">
+        {!hasDate
+          ? 'Set a due date to turn on notifications.'
+          : form.due_time
+            ? 'Sent as a push notification to your devices with notifications turned on.'
+            : 'No due time set, so this task counts as 9:00 AM.'}
+      </p>
+    </div>
   )
 }
